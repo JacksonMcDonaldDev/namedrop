@@ -130,13 +130,8 @@ export default function Study() {
               <Text fw={700} size="xl">
                 {card?.first_name} {card?.last_name || ''}
               </Text>
-              {card?.company && <Text size="sm"><Text component="span" c="dimmed">Company:</Text> {card.company}</Text>}
-              {card?.relationship && <Text size="sm"><Text component="span" c="dimmed">Relationship:</Text> {card.relationship}</Text>}
               {card?.where_met && <Text size="sm"><Text component="span" c="dimmed">Where met:</Text> {card.where_met}</Text>}
-              {card?.email && <Text size="sm"><Text component="span" c="dimmed">Email:</Text> {card.email}</Text>}
-              {card?.phone && <Text size="sm"><Text component="span" c="dimmed">Phone:</Text> {card.phone}</Text>}
               {card?.mnemonic && <Text size="sm" fs="italic"><Text component="span" c="dimmed">Mnemonic:</Text> {card.mnemonic}</Text>}
-              {card?.notes && <Text size="sm"><Text component="span" c="dimmed">Notes:</Text> {card.notes}</Text>}
             </Stack>
           )}
         </Card>

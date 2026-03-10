@@ -88,7 +88,6 @@ export default function ContactList() {
                 <Text fw={500} mt="sm">
                   {contact.first_name} {contact.last_name || ''}
                 </Text>
-                {contact.company && <Text size="sm" c="dimmed">{contact.company}</Text>}
                 {contact.where_met && <Text size="xs" c="dimmed">{contact.where_met}</Text>}
               </Card>
             ))}

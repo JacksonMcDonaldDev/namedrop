@@ -1,25 +1,20 @@
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import {
-  Container, Title, TextInput, Textarea, Select, Button, Stack, Group,
-  Image, Text, Card, Modal, TagsInput, Notification,
+  Container, Title, TextInput, Button, Stack, Group,
+  Image, Text, Card, Modal, Notification,
 } from '@mantine/core';
 import { useForm } from '@mantine/form';
 import { Dropzone, IMAGE_MIME_TYPE } from '@mantine/dropzone';
 import { notifications } from '@mantine/notifications';
-import { getContact, createContact, updateContact, deleteContact, updateMutuals, searchContacts, scrapeLinkedIn } from '../api/contacts';
-import type { Contact, MutualContact } from '../api/contacts';
+import { getContact, createContact, updateContact, deleteContact, searchContacts, scrapeLinkedIn } from '../api/contacts';
+import type { Contact } from '../api/contacts';
 
 interface FormValues {
   first_name: string;
   last_name: string;
-  email: string;
-  phone: string;
-  company: string;
-  relationship: string;
   where_met: string;
   mnemonic: string;
-  notes: string;
 }
 
 export default function ContactForm() {
@@ -33,8 +28,6 @@ export default function ContactForm() {
   const [photoPreview, setPhotoPreview] = useState<string | null>(null);
   const [existingPhoto, setExistingPhoto] = useState<string | null>(null);
   const [removePhoto, setRemovePhoto] = useState(false);
-  const [mutualTags, setMutualTags] = useState<string[]>([]);
-  const [originalMutuals, setOriginalMutuals] = useState<MutualContact[]>([]);
   const [placeholderMatch, setPlaceholderMatch] = useState<Contact | null>(null);
   const [linkedinUrl, setLinkedinUrl] = useState('');
   const [linkedinLoading, setLinkedinLoading] = useState(false);
@@ -43,20 +36,11 @@ export default function ContactForm() {
     initialValues: {
       first_name: '',
       last_name: '',
-      email: '',
-      phone: '',
-      company: '',
-      relationship: '',
       where_met: '',
       mnemonic: '',
-      notes: '',
     },
     validate: {
       first_name: (value) => (value.trim().length === 0 ? 'First name is required' : null),
-      email: (value) => {
-        if (!value) return null;
-        return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value) ? null : 'Invalid email';
-      },
     },
   });
 
@@ -66,22 +50,11 @@ export default function ContactForm() {
         form.setValues({
           first_name: contact.first_name,
           last_name: contact.last_name || '',
-          email: contact.email || '',
-          phone: contact.phone || '',
-          company: contact.company || '',
-          relationship: contact.relationship || '',
           where_met: contact.where_met || '',
           mnemonic: contact.mnemonic || '',
-          notes: contact.notes || '',
         });
         if (contact.photo_path) {
           setExistingPhoto(contact.photo_path);
-        }
-        if (contact.mutuals) {
-          setOriginalMutuals(contact.mutuals);
-          setMutualTags(contact.mutuals.map(m =>
-            `${m.first_name}${m.last_name ? ' ' + m.last_name : ''}`
-          ));
         }
       }).catch(err => {
         console.error(err);
@@ -139,7 +112,6 @@ export default function ContactForm() {
       form.setValues({
         first_name: data.first_name || form.values.first_name,
         last_name: data.last_name || form.values.last_name,
-        company: data.company || form.values.company,
       });
 
       if (data.photo_base64) {
@@ -185,23 +157,10 @@ export default function ContactForm() {
         formData.append('remove_photo', 'true');
       }
 
-      let contact: Contact;
       if (isEdit && id) {
-        contact = await updateContact(id, formData);
+        await updateContact(id, formData);
       } else {
-        contact = await createContact(formData);
-      }
-
-      // Update mutuals
-      const mutualsPayload = mutualTags.map(tag => {
-        const existing = originalMutuals.find(m =>
-          `${m.first_name}${m.last_name ? ' ' + m.last_name : ''}` === tag
-        );
-        return existing ? { id: existing.id } : { name: tag };
-      });
-
-      if (mutualsPayload.length > 0 || originalMutuals.length > 0) {
-        await updateMutuals(contact.id, mutualsPayload);
+        await createContact(formData);
       }
 
       notifications.show({
@@ -276,17 +235,15 @@ export default function ContactForm() {
 
         {!isEdit && (
           <Card shadow="sm" padding="md" radius="md" withBorder>
-            <Text fw={500} mb="xs">Import from LinkedIn</Text>
-            <Group align="flex-end">
+            <Group>
               <TextInput
-                label="LinkedIn Profile URL"
-                placeholder="https://www.linkedin.com/in/username"
+                placeholder="LinkedIn profile URL"
                 value={linkedinUrl}
                 onChange={(e) => setLinkedinUrl(e.currentTarget.value)}
                 style={{ flex: 1 }}
               />
               <Button onClick={handleLinkedInFetch} loading={linkedinLoading}>
-                Fetch
+                Import
               </Button>
             </Group>
           </Card>
@@ -330,48 +287,14 @@ export default function ContactForm() {
               {...form.getInputProps('last_name')}
             />
             <TextInput
-              label="Email"
-              type="email"
-              {...form.getInputProps('email')}
-            />
-            <TextInput
-              label="Phone"
-              {...form.getInputProps('phone')}
-            />
-            <TextInput
-              label="Company"
-              {...form.getInputProps('company')}
-            />
-            <Select
-              label="Relationship"
-              data={['Colleague', 'Client', 'Friend', 'Acquaintance', 'Other']}
-              clearable
-              searchable
-              {...form.getInputProps('relationship')}
-            />
-            <TextInput
               label="Where Met"
               placeholder="e.g. AWS re:Invent 2025, Las Vegas"
               {...form.getInputProps('where_met')}
             />
-
-            <TagsInput
-              label="Mutual Connections"
-              placeholder="Type a name and press Enter"
-              value={mutualTags}
-              onChange={setMutualTags}
-            />
-
             <TextInput
               label="Mnemonic Device"
               placeholder="A memory hook for their name"
               {...form.getInputProps('mnemonic')}
-            />
-            <Textarea
-              label="Notes"
-              autosize
-              minRows={3}
-              {...form.getInputProps('notes')}
             />
 
             <Group justify="flex-end">
