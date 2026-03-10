@@ -1,14 +1,30 @@
-import { useEffect, useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useEffect, useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
 import {
-  Container, Title, TextInput, Button, Stack, Group,
-  Image, Text, Card, Modal, Notification,
-} from '@mantine/core';
-import { useForm } from '@mantine/form';
-import { Dropzone, IMAGE_MIME_TYPE } from '@mantine/dropzone';
-import { notifications } from '@mantine/notifications';
-import { getContact, createContact, updateContact, deleteContact, searchContacts, scrapeLinkedIn } from '../api/contacts';
-import type { Contact } from '../api/contacts';
+  Container,
+  Title,
+  TextInput,
+  Button,
+  Stack,
+  Group,
+  Image,
+  Text,
+  Card,
+  Modal,
+  Notification,
+} from "@mantine/core";
+import { useForm } from "@mantine/form";
+import { Dropzone, IMAGE_MIME_TYPE } from "@mantine/dropzone";
+import { notifications } from "@mantine/notifications";
+import {
+  getContact,
+  createContact,
+  updateContact,
+  deleteContact,
+  searchContacts,
+  scrapeLinkedIn,
+} from "../api/contacts";
+import type { Contact } from "../api/contacts";
 
 interface FormValues {
   first_name: string;
@@ -20,7 +36,7 @@ interface FormValues {
 export default function ContactForm() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const isEdit = Boolean(id) && id !== 'new';
+  const isEdit = Boolean(id) && id !== "new";
 
   const [loading, setLoading] = useState(false);
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
@@ -28,40 +44,45 @@ export default function ContactForm() {
   const [photoPreview, setPhotoPreview] = useState<string | null>(null);
   const [existingPhoto, setExistingPhoto] = useState<string | null>(null);
   const [removePhoto, setRemovePhoto] = useState(false);
-  const [placeholderMatch, setPlaceholderMatch] = useState<Contact | null>(null);
-  const [linkedinUrl, setLinkedinUrl] = useState('');
+  const [placeholderMatch, setPlaceholderMatch] = useState<Contact | null>(
+    null,
+  );
+  const [linkedinUrl, setLinkedinUrl] = useState("");
   const [linkedinLoading, setLinkedinLoading] = useState(false);
 
   const form = useForm<FormValues>({
     initialValues: {
-      first_name: '',
-      last_name: '',
-      where_met: '',
-      mnemonic: '',
+      first_name: "",
+      last_name: "",
+      where_met: "",
+      mnemonic: "",
     },
     validate: {
-      first_name: (value) => (value.trim().length === 0 ? 'First name is required' : null),
+      first_name: (value) =>
+        value.trim().length === 0 ? "First name is required" : null,
     },
   });
 
   useEffect(() => {
     if (isEdit && id) {
-      getContact(id).then(contact => {
-        form.setValues({
-          first_name: contact.first_name,
-          last_name: contact.last_name || '',
-          where_met: contact.where_met || '',
-          mnemonic: contact.mnemonic || '',
+      getContact(id)
+        .then((contact) => {
+          form.setValues({
+            first_name: contact.first_name,
+            last_name: contact.last_name || "",
+            where_met: contact.where_met || "",
+            mnemonic: contact.mnemonic || "",
+          });
+          if (contact.photo_path) {
+            setExistingPhoto(contact.photo_path);
+          }
+        })
+        .catch((err) => {
+          console.error(err);
+          navigate("/contacts");
         });
-        if (contact.photo_path) {
-          setExistingPhoto(contact.photo_path);
-        }
-      }).catch(err => {
-        console.error(err);
-        navigate('/contacts');
-      });
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id, isEdit]);
 
   // Check for placeholder match when creating new contact
@@ -75,9 +96,10 @@ export default function ContactForm() {
     const timeout = setTimeout(async () => {
       try {
         const results = await searchContacts(firstName);
-        const match = results.find((c: any) =>
-          c.is_placeholder &&
-          c.first_name.toLowerCase() === firstName.toLowerCase()
+        const match = results.find(
+          (c: any) =>
+            c.is_placeholder &&
+            c.first_name.toLowerCase() === firstName.toLowerCase(),
         );
         setPlaceholderMatch(match || null);
       } catch {
@@ -85,7 +107,7 @@ export default function ContactForm() {
       }
     }, 500);
     return () => clearTimeout(timeout);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [form.values.first_name, isEdit]);
 
   const handlePhotoDrop = (files: File[]) => {
@@ -117,22 +139,24 @@ export default function ContactForm() {
       if (data.photo_base64) {
         const res = await fetch(data.photo_base64);
         const blob = await res.blob();
-        const file = new File([blob], 'linkedin-photo.jpg', { type: blob.type });
+        const file = new File([blob], "linkedin-photo.jpg", {
+          type: blob.type,
+        });
         setPhotoFile(file);
         setPhotoPreview(URL.createObjectURL(file));
         setRemovePhoto(false);
       }
 
       notifications.show({
-        title: 'LinkedIn Import',
-        message: 'Profile data imported successfully',
-        color: 'green',
+        title: "LinkedIn Import",
+        message: "Profile data imported successfully",
+        color: "green",
       });
     } catch (err: any) {
       notifications.show({
-        title: 'LinkedIn Import Failed',
-        message: err.message || 'Could not fetch LinkedIn profile',
-        color: 'red',
+        title: "LinkedIn Import Failed",
+        message: err.message || "Could not fetch LinkedIn profile",
+        color: "red",
       });
     } finally {
       setLinkedinLoading(false);
@@ -146,15 +170,15 @@ export default function ContactForm() {
       const data: any = { ...values };
       // Clean empty strings to null
       for (const key of Object.keys(data)) {
-        if (data[key] === '') data[key] = undefined;
+        if (data[key] === "") data[key] = undefined;
       }
-      formData.append('data', JSON.stringify(data));
+      formData.append("data", JSON.stringify(data));
 
       if (photoFile) {
-        formData.append('photo', photoFile);
+        formData.append("photo", photoFile);
       }
       if (removePhoto) {
-        formData.append('remove_photo', 'true');
+        formData.append("remove_photo", "true");
       }
 
       if (isEdit && id) {
@@ -164,16 +188,16 @@ export default function ContactForm() {
       }
 
       notifications.show({
-        title: 'Success',
-        message: isEdit ? 'Contact updated' : 'Contact created',
-        color: 'green',
+        title: "Success",
+        message: isEdit ? "Contact updated" : "Contact created",
+        color: "green",
       });
-      navigate('/contacts');
+      navigate("/contacts");
     } catch (err: any) {
       notifications.show({
-        title: 'Error',
-        message: err.message || 'Something went wrong',
-        color: 'red',
+        title: "Error",
+        message: err.message || "Something went wrong",
+        color: "red",
       });
     } finally {
       setLoading(false);
@@ -185,16 +209,16 @@ export default function ContactForm() {
     try {
       await deleteContact(id);
       notifications.show({
-        title: 'Deleted',
-        message: 'Contact deleted',
-        color: 'blue',
+        title: "Deleted",
+        message: "Contact deleted",
+        color: "blue",
       });
-      navigate('/contacts');
+      navigate("/contacts");
     } catch (err: any) {
       notifications.show({
-        title: 'Error',
-        message: err.message || 'Failed to delete',
-        color: 'red',
+        title: "Error",
+        message: err.message || "Failed to delete",
+        color: "red",
       });
     }
     setDeleteModalOpen(false);
@@ -206,9 +230,13 @@ export default function ContactForm() {
     <Container size="sm" py="xl">
       <Stack gap="lg">
         <Group justify="space-between">
-          <Title order={2}>{isEdit ? 'Edit Contact' : 'Add Contact'}</Title>
+          <Title order={2}>{isEdit ? "Edit Contact" : "Add Contact"}</Title>
           {isEdit && (
-            <Button color="red" variant="subtle" onClick={() => setDeleteModalOpen(true)}>
+            <Button
+              color="red"
+              variant="subtle"
+              onClick={() => setDeleteModalOpen(true)}
+            >
               Delete
             </Button>
           )}
@@ -220,15 +248,15 @@ export default function ContactForm() {
             title="Existing placeholder found"
             onClose={() => setPlaceholderMatch(null)}
           >
-            A placeholder named "{placeholderMatch.first_name}" already exists.{' '}
+            A placeholder named "{placeholderMatch.first_name}" already exists.{" "}
             <Text
               component="span"
               c="blue"
-              style={{ cursor: 'pointer', textDecoration: 'underline' }}
+              style={{ cursor: "pointer", textDecoration: "underline" }}
               onClick={() => navigate(`/contacts/${placeholderMatch.id}`)}
             >
               Edit it instead
-            </Text>{' '}
+            </Text>{" "}
             to promote it to a full contact and preserve existing references.
           </Notification>
         )}
@@ -253,12 +281,25 @@ export default function ContactForm() {
           <Stack gap="md">
             {/* Photo upload */}
             <Card shadow="sm" padding="md" radius="md" withBorder>
-              <Text fw={500} mb="xs">Photo</Text>
+              <Text fw={500} mb="xs">
+                Photo
+              </Text>
               {currentPhoto ? (
                 <Stack gap="xs" align="center">
-                  <Image src={currentPhoto} fit="cover" radius="md" style={{ width: 220, height: 275 }} />
+                  <Image
+                    src={currentPhoto}
+                    fit="cover"
+                    radius="md"
+                    style={{ width: 220, height: 275 }}
+                  />
                   <Group>
-                    <Button size="xs" variant="subtle" onClick={handleRemovePhoto}>Remove photo</Button>
+                    <Button
+                      size="xs"
+                      variant="subtle"
+                      onClick={handleRemovePhoto}
+                    >
+                      Remove photo
+                    </Button>
                   </Group>
                 </Stack>
               ) : (
@@ -267,40 +308,48 @@ export default function ContactForm() {
                   accept={IMAGE_MIME_TYPE}
                   maxSize={10 * 1024 * 1024}
                   multiple={false}
-                  style={{ width: 220, aspectRatio: '4 / 5' }}
+                  style={{ width: 220, aspectRatio: "4 / 5" }}
                 >
                   <Stack align="center" justify="center" gap="xs" h="100%">
-                    <Text size="lg" c="dimmed" ta="center">Drop a photo here or click to upload</Text>
-                    <Text size="xs" c="dimmed">JPEG, PNG, or WebP — max 10MB</Text>
+                    <Text size="lg" c="dimmed" ta="center">
+                      Drop a photo here or click to upload
+                    </Text>
+                    <Text size="xs" c="dimmed">
+                      JPEG, PNG, or WebP — max 10MB
+                    </Text>
                   </Stack>
                 </Dropzone>
               )}
             </Card>
 
+            <Group grow>
+              <TextInput
+                label="First Name"
+                required
+                {...form.getInputProps("first_name")}
+              />
+              <TextInput
+                label="Last Name"
+                {...form.getInputProps("last_name")}
+              />
+            </Group>
             <TextInput
-              label="First Name"
-              required
-              {...form.getInputProps('first_name')}
-            />
-            <TextInput
-              label="Last Name"
-              {...form.getInputProps('last_name')}
+              label="Mnemonic Device"
+              placeholder="A memory hook for their name"
+              {...form.getInputProps("mnemonic")}
             />
             <TextInput
               label="Where Met"
               placeholder="e.g. AWS re:Invent 2025, Las Vegas"
-              {...form.getInputProps('where_met')}
-            />
-            <TextInput
-              label="Mnemonic Device"
-              placeholder="A memory hook for their name"
-              {...form.getInputProps('mnemonic')}
+              {...form.getInputProps("where_met")}
             />
 
             <Group justify="flex-end">
-              <Button variant="default" onClick={() => navigate('/contacts')}>Cancel</Button>
+              <Button variant="default" onClick={() => navigate("/contacts")}>
+                Cancel
+              </Button>
               <Button type="submit" loading={loading}>
-                {isEdit ? 'Save Changes' : 'Create Contact'}
+                {isEdit ? "Save Changes" : "Create Contact"}
               </Button>
             </Group>
           </Stack>
@@ -313,10 +362,16 @@ export default function ContactForm() {
         title="Delete Contact"
       >
         <Stack gap="md">
-          <Text>Are you sure you want to delete this contact? This cannot be undone.</Text>
+          <Text>
+            Are you sure you want to delete this contact? This cannot be undone.
+          </Text>
           <Group justify="flex-end">
-            <Button variant="default" onClick={() => setDeleteModalOpen(false)}>Cancel</Button>
-            <Button color="red" onClick={handleDelete}>Delete</Button>
+            <Button variant="default" onClick={() => setDeleteModalOpen(false)}>
+              Cancel
+            </Button>
+            <Button color="red" onClick={handleDelete}>
+              Delete
+            </Button>
           </Group>
         </Stack>
       </Modal>
