@@ -23,10 +23,10 @@ function AppContent() {
       {!isStudying && (
         <AppShell.Header>
           <Group h="100%" px="md" justify="space-between">
-            <Anchor component={Link} to="/" underline="never" c="dark">
+            <Anchor component={Link} to="/" underline="never" c="dimmed">
               <Text fw={700} size="lg">namedrop</Text>
             </Anchor>
-            <Anchor component={Link} to="/contacts" underline="hover" c="dark" size="sm">
+            <Anchor component={Link} to="/contacts" underline="hover" c="dimmed" size="sm">
               Contacts
             </Anchor>
           </Group>
@@ -47,7 +47,7 @@ function AppContent() {
 
 export default function App() {
   return (
-    <MantineProvider theme={theme}>
+    <MantineProvider theme={theme} forceColorScheme="dark">
       <Notifications position="top-right" />
       <BrowserRouter>
         <AppContent />
