@@ -299,7 +299,7 @@ export default function ContactForm() {
               <Text fw={500} mb="xs">Photo</Text>
               {currentPhoto ? (
                 <Stack gap="xs" align="center">
-                  <Image src={currentPhoto} height={200} width={200} fit="cover" radius="md" />
+                  <Image src={currentPhoto} fit="cover" radius="md" style={{ width: 220, height: 275 }} />
                   <Group>
                     <Button size="xs" variant="subtle" onClick={handleRemovePhoto}>Remove photo</Button>
                   </Group>
@@ -310,9 +310,10 @@ export default function ContactForm() {
                   accept={IMAGE_MIME_TYPE}
                   maxSize={10 * 1024 * 1024}
                   multiple={false}
+                  style={{ width: 220, aspectRatio: '4 / 5' }}
                 >
-                  <Stack align="center" gap="xs" py="xl">
-                    <Text size="lg" c="dimmed">Drop a photo here or click to upload</Text>
+                  <Stack align="center" justify="center" gap="xs" h="100%">
+                    <Text size="lg" c="dimmed" ta="center">Drop a photo here or click to upload</Text>
                     <Text size="xs" c="dimmed">JPEG, PNG, or WebP — max 10MB</Text>
                   </Stack>
                 </Dropzone>
