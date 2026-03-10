@@ -119,6 +119,45 @@ export default function ContactForm() {
     }
   };
 
+  const handleNativeDrop = async (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    // If files are present (local file drop), let Dropzone handle it
+    if (e.dataTransfer.files.length > 0) return;
+
+    // Handle image URL dragged from another browser window
+    const url =
+      e.dataTransfer.getData("text/uri-list") ||
+      e.dataTransfer.getData("text/plain");
+
+    // Extract URL from HTML img tag if needed
+    const html = e.dataTransfer.getData("text/html");
+    const imgSrc =
+      url || html?.match(/<img[^>]+src=["']([^"']+)["']/)?.[1];
+
+    if (!imgSrc) return;
+
+    try {
+      const res = await fetch(imgSrc);
+      if (!res.ok) throw new Error("Failed to fetch image");
+      const blob = await res.blob();
+      if (!blob.type.startsWith("image/")) return;
+      const ext = blob.type.split("/")[1] || "jpg";
+      const file = new File([blob], `dropped-image.${ext}`, {
+        type: blob.type,
+      });
+      handlePhotoDrop([file]);
+    } catch {
+      notifications.show({
+        title: "Image drop failed",
+        message:
+          "Could not load the image. The source may block cross-origin requests.",
+        color: "red",
+      });
+    }
+  };
+
   const handleRemovePhoto = () => {
     setPhotoFile(null);
     setPhotoPreview(null);
@@ -280,7 +319,14 @@ export default function ContactForm() {
         <form onSubmit={form.onSubmit(handleSubmit)}>
           <Stack gap="md">
             {/* Photo upload */}
-            <Card shadow="sm" padding="md" radius="md" withBorder>
+            <Card
+              shadow="sm"
+              padding="md"
+              radius="md"
+              withBorder
+              onDrop={handleNativeDrop}
+              onDragOver={(e: React.DragEvent) => e.preventDefault()}
+            >
               <Text fw={500} mb="xs">
                 Photo
               </Text>
