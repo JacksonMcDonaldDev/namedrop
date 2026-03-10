@@ -6,6 +6,7 @@ import Dashboard from './pages/Dashboard';
 import ContactList from './pages/ContactList';
 import ContactForm from './pages/ContactForm';
 import Study from './pages/Study';
+import ErrorBoundary from './ErrorBoundary';
 
 import '@mantine/core/styles.css';
 import '@mantine/notifications/styles.css';
@@ -47,11 +48,13 @@ function AppContent() {
 
 export default function App() {
   return (
-    <MantineProvider theme={theme} forceColorScheme="dark">
-      <Notifications position="top-right" />
-      <BrowserRouter>
-        <AppContent />
-      </BrowserRouter>
-    </MantineProvider>
+    <ErrorBoundary>
+      <MantineProvider theme={theme} forceColorScheme="dark">
+        <Notifications position="top-right" />
+        <BrowserRouter>
+          <AppContent />
+        </BrowserRouter>
+      </MantineProvider>
+    </ErrorBoundary>
   );
 }

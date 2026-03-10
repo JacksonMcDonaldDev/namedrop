@@ -1,3 +1,5 @@
+import { apiError } from './fetch';
+
 const BASE = '/api/study';
 
 export interface StudyCard {
@@ -43,13 +45,13 @@ export interface StudyStatus {
 
 export async function startSession(): Promise<SessionStartResponse> {
   const res = await fetch(`${BASE}/sessions`, { method: 'POST' });
-  if (!res.ok) throw new Error('Failed to start session');
+  if (!res.ok) throw await apiError(res, 'Failed to start session');
   return res.json();
 }
 
 export async function getNextCard(sessionId: string): Promise<ReviewResponse> {
   const res = await fetch(`${BASE}/sessions/${sessionId}/next`);
-  if (!res.ok) throw new Error('Failed to get next card');
+  if (!res.ok) throw await apiError(res, 'Failed to get next card');
   return res.json();
 }
 
@@ -59,18 +61,18 @@ export async function submitReview(sessionId: string, contactId: string, rating:
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ contact_id: contactId, rating }),
   });
-  if (!res.ok) throw new Error('Failed to submit review');
+  if (!res.ok) throw await apiError(res, 'Failed to submit review');
   return res.json();
 }
 
 export async function completeSession(sessionId: string): Promise<SessionSummary> {
   const res = await fetch(`${BASE}/sessions/${sessionId}/complete`, { method: 'POST' });
-  if (!res.ok) throw new Error('Failed to complete session');
+  if (!res.ok) throw await apiError(res, 'Failed to complete session');
   return res.json();
 }
 
 export async function getStudyStatus(): Promise<StudyStatus> {
   const res = await fetch(`${BASE}/status`);
-  if (!res.ok) throw new Error('Failed to get study status');
+  if (!res.ok) throw await apiError(res, 'Failed to get study status');
   return res.json();
 }

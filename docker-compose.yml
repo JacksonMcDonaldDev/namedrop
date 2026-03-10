@@ -15,6 +15,7 @@ services:
     environment:
       DATABASE_URL: postgres://namedrop:${DB_PASSWORD}@db:5432/namedrop
     volumes:
+      - ./server/src:/app/src
       - photos:/app/uploads/photos
     ports:
       - "3001:3001"

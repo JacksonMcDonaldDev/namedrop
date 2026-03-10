@@ -4,10 +4,12 @@ import path from 'path';
 import { runMigrations } from './migrate';
 import { router } from './routes';
 import { errorHandler } from './middleware/errorHandler';
+import { requestLogger } from './middleware/requestLogger';
 
 const app = express();
 const PORT = process.env.PORT || 3001;
 
+app.use(requestLogger);
 app.use(cors());
 app.use(express.json());
 

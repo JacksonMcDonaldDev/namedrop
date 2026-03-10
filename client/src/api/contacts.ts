@@ -1,3 +1,5 @@
+import { apiError } from './fetch';
+
 const BASE = '/api/contacts';
 
 export interface Contact {
@@ -28,42 +30,36 @@ export interface MutualContact {
 export async function listContacts(search?: string): Promise<Contact[]> {
   const url = search ? `${BASE}?search=${encodeURIComponent(search)}` : BASE;
   const res = await fetch(url);
-  if (!res.ok) throw new Error('Failed to fetch contacts');
+  if (!res.ok) throw await apiError(res, 'Failed to fetch contacts');
   return res.json();
 }
 
 export async function getContact(id: string): Promise<Contact> {
   const res = await fetch(`${BASE}/${id}`);
-  if (!res.ok) throw new Error('Failed to fetch contact');
+  if (!res.ok) throw await apiError(res, 'Failed to fetch contact');
   return res.json();
 }
 
 export async function createContact(data: FormData): Promise<Contact> {
   const res = await fetch(BASE, { method: 'POST', body: data });
-  if (!res.ok) {
-    const err = await res.json();
-    throw new Error(err.error || 'Failed to create contact');
-  }
+  if (!res.ok) throw await apiError(res, 'Failed to create contact');
   return res.json();
 }
 
 export async function updateContact(id: string, data: FormData): Promise<Contact> {
   const res = await fetch(`${BASE}/${id}`, { method: 'PUT', body: data });
-  if (!res.ok) {
-    const err = await res.json();
-    throw new Error(err.error || 'Failed to update contact');
-  }
+  if (!res.ok) throw await apiError(res, 'Failed to update contact');
   return res.json();
 }
 
 export async function deleteContact(id: string): Promise<void> {
   const res = await fetch(`${BASE}/${id}`, { method: 'DELETE' });
-  if (!res.ok) throw new Error('Failed to delete contact');
+  if (!res.ok) throw await apiError(res, 'Failed to delete contact');
 }
 
 export async function getMutuals(id: string): Promise<MutualContact[]> {
   const res = await fetch(`${BASE}/${id}/mutuals`);
-  if (!res.ok) throw new Error('Failed to fetch mutuals');
+  if (!res.ok) throw await apiError(res, 'Failed to fetch mutuals');
   return res.json();
 }
 
@@ -73,7 +69,7 @@ export async function updateMutuals(id: string, mutuals: Array<{ id?: string; na
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ mutuals }),
   });
-  if (!res.ok) throw new Error('Failed to update mutuals');
+  if (!res.ok) throw await apiError(res, 'Failed to update mutuals');
   return res.json();
 }
 
@@ -95,9 +91,6 @@ export async function scrapeLinkedIn(url: string): Promise<LinkedInScrapedData> 
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ url }),
   });
-  if (!res.ok) {
-    const err = await res.json();
-    throw new Error(err.error || 'Failed to scrape LinkedIn profile');
-  }
+  if (!res.ok) throw await apiError(res, 'Failed to scrape LinkedIn profile');
   return res.json();
 }
