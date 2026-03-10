@@ -80,3 +80,24 @@ export async function updateMutuals(id: string, mutuals: Array<{ id?: string; na
 export async function searchContacts(query: string): Promise<Contact[]> {
   return listContacts(query);
 }
+
+export interface LinkedInScrapedData {
+  first_name: string;
+  last_name: string;
+  company: string | null;
+  headline: string | null;
+  photo_base64: string | null;
+}
+
+export async function scrapeLinkedIn(url: string): Promise<LinkedInScrapedData> {
+  const res = await fetch('/api/linkedin/scrape', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ url }),
+  });
+  if (!res.ok) {
+    const err = await res.json();
+    throw new Error(err.error || 'Failed to scrape LinkedIn profile');
+  }
+  return res.json();
+}

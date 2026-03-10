@@ -21,14 +21,14 @@ services:
     depends_on:
       - db
 
-  client:
-    build: ./client
-    environment:
-      API_URL: http://server:3001
-    ports:
-      - "3000:3000"
-    depends_on:
-      - server
+  # client:
+  #   build: ./client
+  #   environment:
+  #     API_URL: http://server:3001
+  #   ports:
+  #     - "3000:3000"
+  #   depends_on:
+  #     - server
 
 volumes:
   pg_data:

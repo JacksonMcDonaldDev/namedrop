@@ -7,7 +7,7 @@ import {
 import { useForm } from '@mantine/form';
 import { Dropzone, IMAGE_MIME_TYPE } from '@mantine/dropzone';
 import { notifications } from '@mantine/notifications';
-import { getContact, createContact, updateContact, deleteContact, updateMutuals, searchContacts } from '../api/contacts';
+import { getContact, createContact, updateContact, deleteContact, updateMutuals, searchContacts, scrapeLinkedIn } from '../api/contacts';
 import type { Contact, MutualContact } from '../api/contacts';
 
 interface FormValues {
@@ -36,6 +36,8 @@ export default function ContactForm() {
   const [mutualTags, setMutualTags] = useState<string[]>([]);
   const [originalMutuals, setOriginalMutuals] = useState<MutualContact[]>([]);
   const [placeholderMatch, setPlaceholderMatch] = useState<Contact | null>(null);
+  const [linkedinUrl, setLinkedinUrl] = useState('');
+  const [linkedinLoading, setLinkedinLoading] = useState(false);
 
   const form = useForm<FormValues>({
     initialValues: {
@@ -127,6 +129,42 @@ export default function ContactForm() {
     setPhotoPreview(null);
     setExistingPhoto(null);
     setRemovePhoto(true);
+  };
+
+  const handleLinkedInFetch = async () => {
+    if (!linkedinUrl.trim()) return;
+    setLinkedinLoading(true);
+    try {
+      const data = await scrapeLinkedIn(linkedinUrl.trim());
+      form.setValues({
+        first_name: data.first_name || form.values.first_name,
+        last_name: data.last_name || form.values.last_name,
+        company: data.company || form.values.company,
+      });
+
+      if (data.photo_base64) {
+        const res = await fetch(data.photo_base64);
+        const blob = await res.blob();
+        const file = new File([blob], 'linkedin-photo.jpg', { type: blob.type });
+        setPhotoFile(file);
+        setPhotoPreview(URL.createObjectURL(file));
+        setRemovePhoto(false);
+      }
+
+      notifications.show({
+        title: 'LinkedIn Import',
+        message: 'Profile data imported successfully',
+        color: 'green',
+      });
+    } catch (err: any) {
+      notifications.show({
+        title: 'LinkedIn Import Failed',
+        message: err.message || 'Could not fetch LinkedIn profile',
+        color: 'red',
+      });
+    } finally {
+      setLinkedinLoading(false);
+    }
   };
 
   const handleSubmit = async (values: FormValues) => {
@@ -234,6 +272,24 @@ export default function ContactForm() {
             </Text>{' '}
             to promote it to a full contact and preserve existing references.
           </Notification>
+        )}
+
+        {!isEdit && (
+          <Card shadow="sm" padding="md" radius="md" withBorder>
+            <Text fw={500} mb="xs">Import from LinkedIn</Text>
+            <Group align="flex-end">
+              <TextInput
+                label="LinkedIn Profile URL"
+                placeholder="https://www.linkedin.com/in/username"
+                value={linkedinUrl}
+                onChange={(e) => setLinkedinUrl(e.currentTarget.value)}
+                style={{ flex: 1 }}
+              />
+              <Button onClick={handleLinkedInFetch} loading={linkedinLoading}>
+                Fetch
+              </Button>
+            </Group>
+          </Card>
         )}
 
         <form onSubmit={form.onSubmit(handleSubmit)}>
