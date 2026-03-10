@@ -14,23 +14,36 @@ export async function scrapeLinkedInProfile(url: string): Promise<LinkedInProfil
     throw new Error('Invalid LinkedIn URL. Expected format: https://www.linkedin.com/in/username');
   }
 
-  // Fetch the page with browser-like headers
-  const response = await fetch(url, {
-    headers: {
-      'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-      'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
-      'Accept-Language': 'en-US,en;q=0.9',
-      'Cache-Control': 'no-cache',
-    },
-    redirect: 'follow',
-  });
+  // Try multiple crawler user agents — LinkedIn whitelists these for OG previews
+  const userAgents = [
+    'LinkedInBot/1.0 (compatible; Mozilla/5.0; Apache-HttpClient +http://www.linkedin.com)',
+    'facebookexternalhit/1.1 (+http://www.facebook.com/externalhit_uatext.php)',
+    'Twitterbot/1.0',
+    'Slackbot-LinkExpanding 1.0 (+https://api.slack.com/robots)',
+  ];
 
-  if (response.status === 999 || response.status === 403) {
-    throw new Error('LinkedIn blocked the request. Try again later.');
+  let response: Response | null = null;
+  let lastStatus = 0;
+
+  for (const ua of userAgents) {
+    response = await fetch(url, {
+      headers: {
+        'User-Agent': ua,
+        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+        'Accept-Language': 'en-US,en;q=0.9',
+      },
+      redirect: 'follow',
+    });
+    lastStatus = response.status;
+    console.log(`LinkedIn fetch with "${ua}": status ${lastStatus}`);
+    if (response.ok) break;
   }
 
-  if (!response.ok) {
-    throw new Error(`Failed to fetch LinkedIn page (status ${response.status})`);
+  if (!response || !response.ok) {
+    if (lastStatus === 999 || lastStatus === 403) {
+      throw new Error('LinkedIn blocked the request. Try again later.');
+    }
+    throw new Error(`Failed to fetch LinkedIn page (status ${lastStatus})`);
   }
 
   const html = await response.text();

@@ -14,6 +14,7 @@ router.post('/scrape', async (req, res) => {
     const data = await scrapeLinkedInProfile(url);
     res.json(data);
   } catch (err: any) {
+    console.error('LinkedIn scrape error:', err);
     res.status(422).json({ error: err.message || 'Failed to scrape LinkedIn profile' });
   }
 });
