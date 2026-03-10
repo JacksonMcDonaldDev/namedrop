@@ -122,6 +122,20 @@ export async function getSessionSummary(sessionId: string) {
   };
 }
 
+export async function getAllStudyableCards(): Promise<DueCard[]> {
+  const { rows } = await pool.query(`
+    SELECT c.id, c.first_name, c.last_name, c.email, c.phone, c.company,
+           c.relationship, c.where_met, c.photo_path, c.mnemonic, c.notes,
+           (cr.id IS NULL) as is_new
+    FROM contacts c
+    LEFT JOIN card_reviews cr ON cr.contact_id = c.id
+    WHERE c.is_placeholder = false
+      AND c.photo_path IS NOT NULL
+    ORDER BY cr.due_at ASC NULLS FIRST
+  `);
+  return rows;
+}
+
 export async function getStudyStatus() {
   // Count of due cards
   const { rows: dueRows } = await pool.query(`

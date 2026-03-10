@@ -13,19 +13,22 @@ const sessionQueues = new Map<string, string[]>();
 // POST /study/sessions — Start new session
 router.post('/sessions', async (_req, res, next) => {
   try {
-    const dueCards = await studyModel.getDueCards();
-    if (dueCards.length === 0) {
-      const status = await studyModel.getStudyStatus();
-      res.json({ empty: true, next_due: status.next_due });
+    let cards = await studyModel.getDueCards();
+    if (cards.length === 0) {
+      // No due cards — fall back to all studyable cards
+      cards = await studyModel.getAllStudyableCards();
+    }
+    if (cards.length === 0) {
+      res.json({ empty: true, next_due: null });
       return;
     }
 
     const session = await studyModel.createSession();
-    const queue = dueCards.map(c => c.id);
+    const queue = cards.map(c => c.id);
     sessionQueues.set(session.id, queue);
 
     const firstCardId = queue[0];
-    const firstCard = dueCards.find(c => c.id === firstCardId)!;
+    const firstCard = cards.find(c => c.id === firstCardId)!;
 
     res.status(201).json({
       session_id: session.id,

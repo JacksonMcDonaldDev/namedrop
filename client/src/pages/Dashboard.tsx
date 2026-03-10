@@ -58,7 +58,7 @@ export default function Dashboard() {
                   {status?.next_due && (
                     <Text c="dimmed">Next review in {formatNextDue(status.next_due)}</Text>
                   )}
-                  <Button size="lg" disabled variant="light">
+                  <Button size="lg" variant="light" onClick={() => navigate('/study')}>
                     Study Now
                   </Button>
                 </>

@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Container, Card, Image, Text, Stack, Group, Button, SegmentedControl, Skeleton, Title } from '@mantine/core';
+import { Container, Card, Image, Text, Stack, Group, Button, Skeleton, Title } from '@mantine/core';
 import { startSession, submitReview, completeSession } from '../api/study';
 import type { StudyCard, SessionSummary } from '../api/study';
 
@@ -140,17 +140,12 @@ export default function Study() {
         {state === 'back' && (
           <Stack align="center" gap="xs" w="100%" maw={400}>
             <Text size="sm" c="dimmed">How well did you recall?</Text>
-            <SegmentedControl
-              fullWidth
-              size="md"
-              data={[
-                { value: 'again', label: 'Again' },
-                { value: 'hard', label: 'Hard' },
-                { value: 'good', label: 'Good' },
-                { value: 'easy', label: 'Easy' },
-              ]}
-              onChange={handleRate}
-            />
+            <Group grow w="100%">
+              <Button variant="light" color="red" onClick={() => handleRate('again')}>Again</Button>
+              <Button variant="light" color="orange" onClick={() => handleRate('hard')}>Hard</Button>
+              <Button variant="light" color="blue" onClick={() => handleRate('good')}>Good</Button>
+              <Button variant="light" color="green" onClick={() => handleRate('easy')}>Easy</Button>
+            </Group>
           </Stack>
         )}
 

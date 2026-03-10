@@ -1,5 +1,5 @@
 import { BrowserRouter, Routes, Route, Link, useLocation } from 'react-router-dom';
-import { MantineProvider, AppShell, Group, Anchor, Text } from '@mantine/core';
+import { MantineProvider, AppShell, Group, Anchor, Text, Button } from '@mantine/core';
 import { Notifications } from '@mantine/notifications';
 import { theme } from './theme';
 import Dashboard from './pages/Dashboard';
@@ -27,9 +27,24 @@ function AppContent() {
             <Anchor component={Link} to="/" underline="never" c="dimmed">
               <Text fw={700} size="lg">namedrop</Text>
             </Anchor>
-            <Anchor component={Link} to="/contacts" underline="hover" c="dimmed" size="sm">
-              Contacts
-            </Anchor>
+            <Group gap="xs">
+              <Button
+                component={Link}
+                to="/"
+                variant={location.pathname === '/' ? 'light' : 'subtle'}
+                size="sm"
+              >
+                Study
+              </Button>
+              <Button
+                component={Link}
+                to="/contacts"
+                variant={location.pathname.startsWith('/contacts') ? 'light' : 'subtle'}
+                size="sm"
+              >
+                Contacts
+              </Button>
+            </Group>
           </Group>
         </AppShell.Header>
       )}
