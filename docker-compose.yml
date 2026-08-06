@@ -17,6 +17,9 @@ services:
     volumes:
       - ./server/src:/app/src
       - photos:/app/uploads/photos
+      # Prebuilt-deck seed images: bind-mounted so the one-off seed script can be
+      # run from the host and the photos survive a container rebuild.
+      - ./server/uploads/celebrity-photos:/app/uploads/celebrity-photos
     ports:
       - "3001:3001"
     depends_on:
