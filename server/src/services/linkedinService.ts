@@ -8,10 +8,16 @@ interface LinkedInProfile {
   photo_base64: string | null;
 }
 
+export const LINKEDIN_PROFILE_URL = /^https?:\/\/(www\.)?linkedin\.com\/in\/[\w-]+\/?/;
+
+export const INVALID_URL_MESSAGE =
+  'Invalid LinkedIn URL. Expected format: https://www.linkedin.com/in/username';
+
 export async function scrapeLinkedInProfile(url: string): Promise<LinkedInProfile> {
-  // Validate URL
-  if (!/^https?:\/\/(www\.)?linkedin\.com\/in\/[\w-]+\/?/.test(url)) {
-    throw new Error('Invalid LinkedIn URL. Expected format: https://www.linkedin.com/in/username');
+  // The route rejects a malformed URL with a 400 before we get here; this stays
+  // as a guard for any other caller.
+  if (!LINKEDIN_PROFILE_URL.test(url)) {
+    throw new Error(INVALID_URL_MESSAGE);
   }
 
   // Try multiple crawler user agents — LinkedIn whitelists these for OG previews

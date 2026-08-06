@@ -3,7 +3,7 @@ import app from '../src/app';
 
 // POST /api/linkedin/scrape fetches a real linkedin.com page when it is handed a
 // well-formed profile URL, so these tests deliberately stop at the last point
-// before the network: missing/malformed input, which the service rejects from a
+// before the network: missing/malformed input, which the route rejects from a
 // local regex check before any fetch() happens. Anything past that (OG-tag
 // parsing, name/company splitting, photo download) is not reachable at the HTTP
 // seam without either hitting LinkedIn or mocking fetch, and this suite does
@@ -35,7 +35,7 @@ describe('POST /api/linkedin/scrape', () => {
     ['free text', 'ada lovelace'],
   ])('rejects %s without calling out to LinkedIn', async (_label, url) => {
     const res = await request(app).post('/api/linkedin/scrape').send({ url });
-    expect(res.status).toBe(422);
+    expect(res.status).toBe(400);
     expect(res.body.error).toMatch(/Invalid LinkedIn URL/);
   });
 });
