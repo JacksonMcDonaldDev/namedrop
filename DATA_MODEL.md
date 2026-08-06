@@ -1,5 +1,7 @@
 # Data Model: Namedrop
 
+> **Scope note (2026-08-05):** This document describes the full V2-ready model. The schema actually implemented in V1 (`server/migrations/001_initial.sql`) is the subset documented in SYSTEM_ARCHITECTURE.md §9 — no `users` or `decks` tables, no `user_id`, `deck_id`, or `card_type` columns. The V1 migration matches that subset exactly.
+
 ---
 
 ## Entity Overview

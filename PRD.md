@@ -1,7 +1,7 @@
 # Product Requirements Document: Namedrop
 
-**Version:** 1.0 (Draft)
-**Date:** 2026-03-05
+**Version:** 1.1
+**Date:** 2026-03-05 (status updated 2026-08-05 — see §11)
 
 ---
 
@@ -162,3 +162,26 @@ Users can generate Anki-style flashcard decks from their contact database.
 - [x] Auth: Deferred to V2. V1 is single-user, no login.
 - [x] Decks: Deferred to V2. V1 studies all contacts with photos in a single global pool.
 - [x] Filter semantics (V2): OR within array fields, AND across fields, ILIKE for text fields, range check for dates.
+
+---
+
+## 11. Implementation Status (as of 2026-08-05)
+
+### Built and working
+- Contact CRUD with search (name, company, where met) and list view
+- Photo upload with server-side processing (resize, JPEG conversion), drag-and-drop including image URLs dragged from other browser windows
+- Study sessions: SM-2 scheduling, Again/Hard/Good/Easy ratings, "again" re-queueing, session summary with rating breakdown
+- Dashboard with due-card count and next-due date
+- Placeholder-match notification on the contact form: entering a first name that matches an existing placeholder prompts the user to edit/promote it instead (matches on exact first name only)
+
+### Partially built
+- **Mutual Relationships (§5.1):** the backend is complete — junction table, `GET`/`PUT /contacts/:id/mutuals` endpoints, placeholder auto-creation, and orphan garbage collection — and the client API layer has bindings for it, but **no page in the UI exposes it**. Mutual relationships cannot currently be viewed or edited in the app.
+
+### Diverged from this PRD
+- **Contact fields (§5.1):** the contact form only exposes First Name, Last Name, Where Met, and Mnemonic Device. Email, Phone, Company, Relationship, and Notes exist in the database schema and API but were removed from the form UI, and the study card back shows only name, where met, and mnemonic. Decision pending: reinstate the fields or trim them from the spec.
+- **LinkedIn import (§6):** listed as out of scope, but implemented anyway — the Add Contact form accepts a LinkedIn profile URL and imports name + photo via server-side scraping (`POST /api/linkedin/scrape`).
+- **Study fallback:** when no cards are due, the app starts a session over all studyable cards instead of showing "nothing to study" (practice mode by default).
+
+### Not built
+- Automated tests (none in client or server)
+- Everything explicitly deferred to V2 in §10: auth, decks/filters, multiple card types

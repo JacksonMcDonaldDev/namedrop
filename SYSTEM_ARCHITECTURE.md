@@ -1,7 +1,7 @@
 # System Architecture: Namedrop (V1)
 
-**Version:** 1.0
-**Date:** 2026-03-08
+**Version:** 1.1
+**Date:** 2026-03-08 (updated 2026-08-05 to reflect the implementation as built — see §12)
 
 ---
 
@@ -55,9 +55,9 @@ V1 is a single-user, self-hosted web app. No authentication, no decks, no filter
 ### Flow: "Time to study"
 1. Dashboard → Study
 2. App gathers all contacts with photos that are due or never reviewed
-3. If no cards are due: "Nothing to study right now" with next due date
+3. If no cards are due, the session falls back to **all** studyable cards (practice mode). The empty state only appears when no contacts have photos at all.
 4. Card appears: photo on front
-5. User mentally recalls, taps to reveal back (all contact details)
+5. User mentally recalls, taps to reveal back (name, where met, mnemonic — the API returns all contact fields, but the card back currently renders only these)
 6. User rates: Again / Hard / Good / Easy
 7. SM-2 updates scheduling state
 8. Next card (or summary if done)
@@ -71,12 +71,11 @@ V1 is a single-user, self-hosted web app. No authentication, no decks, no filter
 |---|---|---|
 | Dashboard | `/` | Entry point. Study and Contacts buttons. Shows due card count. |
 | Contact List | `/contacts` | Searchable list of all non-placeholder contacts. Add button. |
-| Add Contact | `/contacts/new` | Form with all contact fields + photo upload |
+| Add Contact | `/contacts/new` | Form: first name, last name, mnemonic, where met + photo upload + LinkedIn URL import. Other schema fields (email, phone, company, relationship, notes) have no form UI — see §12. |
 | Edit Contact | `/contacts/:id` | Same form, pre-populated. Delete option. |
-| Study Session | `/study` | Active study session — card display + rating |
-| Session Summary | `/study/summary` | Post-session stats |
+| Study Session | `/study` | Active study session — card display + rating. Session summary renders in place on this route when the session completes (no separate `/study/summary` route). |
 
-Navigation: simple top bar with "namedrop" (home) and "Contacts" link. Study is accessed from dashboard.
+Navigation: top bar with "namedrop" (home), Study, and Contacts buttons; hidden during study sessions for a distraction-free view.
 
 ---
 
@@ -108,6 +107,14 @@ Photos are uploaded as part of contact create/update (multipart). Served as stat
 |---|---|---|
 | GET | `/contacts/:id/mutuals` | Get mutual relationships for a contact |
 | PUT | `/contacts/:id/mutuals` | Replace mutual relationships (array of contact IDs and/or new placeholder names) |
+
+These endpoints are implemented (including placeholder auto-creation and orphan GC) but currently have **no client UI** — see §12.
+
+### LinkedIn Import
+
+| Method | Path | Purpose |
+|---|---|---|
+| POST | `/linkedin/scrape` | Body: `{ url }`. Scrapes a public LinkedIn profile server-side and returns `first_name`, `last_name`, and the profile photo as base64. Used by the Add Contact form. |
 
 ### Study
 
@@ -193,6 +200,7 @@ namedrop/
 ### Card Pool
 - All contacts belonging to the user where `is_placeholder = false` AND `photo_path IS NOT NULL`
 - A card is **due** if `card_reviews.due_at <= now()` or if no `card_reviews` row exists (never reviewed)
+- If nothing is due when a session starts, the session includes **all** studyable cards instead (practice mode)
 
 ### Session Behavior
 - **Session size:** All due cards + up to **10 new cards** (never reviewed) per session. New cards are introduced in the order they were created (oldest first).
@@ -200,6 +208,7 @@ namedrop/
 - **"Again" re-queue:** If rated "Again", the card is re-queued and will appear again later in the same session (after at least 3 other cards, or at the end if fewer than 3 remain).
 - **Mid-session quit:** The session can be abandoned. Cards already rated are saved. Unreviewed cards remain in their current scheduling state. The session is marked incomplete (`completed_at` stays null).
 - **Completion:** Session ends when all cards (including re-queued) have been reviewed. Summary is displayed.
+- **Session queue storage:** the per-session card queue lives in server memory (a `Map` in `routes/study.ts`), not the database. A server restart drops in-progress sessions; ratings already submitted are preserved. Acceptable for single-user V1.
 
 ### SM-2 Implementation
 
@@ -236,10 +245,10 @@ function sm2(card, rating):
 ### Upload
 - Accepted formats: JPEG, PNG, WebP
 - Max upload size: 10 MB (enforced by middleware)
-- Server-side processing on upload:
-  - Convert to JPEG
-  - Resize to max 800x800px (maintain aspect ratio)
-  - Strip EXIF metadata (privacy)
+- Server-side processing on upload (sharp):
+  - Auto-rotate based on EXIF orientation, then strip EXIF metadata (privacy)
+  - Resize to max 800x800px (maintain aspect ratio, no enlargement)
+  - Convert to JPEG (quality 85)
   - Save to `server/uploads/photos/{contact_id}.jpg`
 
 ### Serving
@@ -378,3 +387,15 @@ Decisions made now to keep V2 migration clean:
 | Auth | Add `users` table, add `user_id` FK to all tables, add auth middleware. No V1 schema changes needed — additive migration. |
 | Decks + Filters | Add `decks` table, add `deck_id` to `study_sessions`. Filter semantics: OR within array fields, AND across fields, ILIKE for text, range for dates. |
 | Multiple card types | Add `card_type` column to `card_reviews` and `review_events`, update unique constraint. |
+
+---
+
+## 12. Implementation Status (2026-08-05)
+
+Where the implementation stands relative to this document:
+
+- **Core loop is built:** contact CRUD + search, photo upload/processing, SM-2 study sessions with re-queueing, session summary, dashboard due counts. The schema in §9 matches `server/migrations/001_initial.sql` exactly.
+- **Mutual relationships: backend only.** The endpoints in §4, placeholder auto-creation, and orphan GC (`services/placeholderGC.ts`) are all implemented, and `client/src/api/contacts.ts` has `getMutuals`/`updateMutuals` bindings — but no page renders or edits mutuals, so the feature is unreachable from the UI. The only placeholder-related UI is the "existing placeholder found" notification on the Add Contact form.
+- **Contact form is trimmed:** only first name, last name, where met, and mnemonic have inputs. Email, phone, company, relationship, and notes remain in the schema, API, and study card payload but have no UI (form inputs removed; card back doesn't render them).
+- **LinkedIn import added** (`routes/linkedin.ts`, `services/linkedinService.ts`) even though the PRD listed it as out of scope: the Add Contact form imports name + photo from a LinkedIn profile URL.
+- **No automated tests** in either client or server.
