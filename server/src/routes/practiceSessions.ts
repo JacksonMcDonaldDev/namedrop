@@ -14,6 +14,9 @@ const RESULT_VALUES = ['got_it', 'missed_it'];
 
 router.use(validateUuidParam('deckId'));
 
+// Only the create route needs this. Every other route is reached through a
+// session id, and a session only exists because this check passed when it was
+// created — so re-running it there would re-query the deck to learn nothing.
 async function assertDrillableDeck(deckId: string): Promise<void> {
   const deck = await practiceSessionsModel.getDeck(deckId);
   if (!deck) throw new AppError(404, 'Deck not found');
@@ -46,8 +49,6 @@ router.post('/', async (req: Request<DeckParams>, res, next) => {
 // response to /complete.
 router.get('/:sessionId', validateUuidParam('sessionId'), async (req: Request<SessionParams>, res, next) => {
   try {
-    await assertDrillableDeck(req.params.deckId);
-
     const session = await practiceSessionsModel.getSessionForDeck(req.params.sessionId, req.params.deckId);
     if (!session) throw new AppError(404, 'Practice session not found');
 
@@ -61,7 +62,6 @@ router.get('/:sessionId', validateUuidParam('sessionId'), async (req: Request<Se
 // POST /decks/:deckId/practice-sessions/:sessionId/events — submit a got-it/missed-it event
 router.post('/:sessionId/events', validateUuidParam('sessionId'), async (req: Request<SessionParams>, res, next) => {
   try {
-    await assertDrillableDeck(req.params.deckId);
     await loadOpenSession(req.params.sessionId, req.params.deckId);
 
     const { deck_person_id, result } = req.body;
@@ -85,7 +85,6 @@ router.post('/:sessionId/events', validateUuidParam('sessionId'), async (req: Re
 // POST /decks/:deckId/practice-sessions/:sessionId/complete — end the session, return the summary
 router.post('/:sessionId/complete', validateUuidParam('sessionId'), async (req: Request<SessionParams>, res, next) => {
   try {
-    await assertDrillableDeck(req.params.deckId);
     await loadOpenSession(req.params.sessionId, req.params.deckId);
 
     await practiceSessionsModel.completeSession(req.params.sessionId);

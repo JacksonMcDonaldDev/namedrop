@@ -134,7 +134,9 @@ router.post('/sessions/:id/complete', validateUuidParam('id'), async (req, res, 
   }
 });
 
-// GET /study/status — Dashboard info
+// GET /study/status — due/total counts. No client caller since the Dashboard
+// was retired; kept as the externally observable surface the tests assert
+// scheduling against.
 router.get('/status', async (_req, res, next) => {
   try {
     const status = await studyModel.getStudyStatus();
