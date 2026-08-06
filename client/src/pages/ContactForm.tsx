@@ -33,10 +33,12 @@ interface FormValues {
   mnemonic: string;
 }
 
+const MY_PEOPLE_PATH = "/decks/my-people";
+
 export default function ContactForm() {
-  const { id } = useParams();
+  const { personId: id } = useParams();
   const navigate = useNavigate();
-  const isEdit = Boolean(id) && id !== "new";
+  const isEdit = Boolean(id);
 
   const [loading, setLoading] = useState(false);
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
@@ -79,7 +81,7 @@ export default function ContactForm() {
         })
         .catch((err) => {
           console.error(err);
-          navigate("/contacts");
+          navigate(MY_PEOPLE_PATH);
         });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -231,7 +233,7 @@ export default function ContactForm() {
         message: isEdit ? "Contact updated" : "Contact created",
         color: "green",
       });
-      navigate("/contacts");
+      navigate(MY_PEOPLE_PATH);
     } catch (err: any) {
       notifications.show({
         title: "Error",
@@ -252,7 +254,7 @@ export default function ContactForm() {
         message: "Contact deleted",
         color: "blue",
       });
-      navigate("/contacts");
+      navigate(MY_PEOPLE_PATH);
     } catch (err: any) {
       notifications.show({
         title: "Error",
@@ -292,7 +294,7 @@ export default function ContactForm() {
               component="span"
               c="blue"
               style={{ cursor: "pointer", textDecoration: "underline" }}
-              onClick={() => navigate(`/contacts/${placeholderMatch.id}`)}
+              onClick={() => navigate(`${MY_PEOPLE_PATH}/${placeholderMatch.id}`)}
             >
               Edit it instead
             </Text>{" "}
@@ -391,7 +393,7 @@ export default function ContactForm() {
             />
 
             <Group justify="flex-end">
-              <Button variant="default" onClick={() => navigate("/contacts")}>
+              <Button variant="default" onClick={() => navigate(MY_PEOPLE_PATH)}>
                 Cancel
               </Button>
               <Button type="submit" loading={loading}>

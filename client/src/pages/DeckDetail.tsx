@@ -103,19 +103,37 @@ export default function DeckDetail() {
           <Group gap="xs">
             <Button variant="light" onClick={() => setTipsOpen(true)}>Technique Tips</Button>
             {deck.type === 'virtual' && (
-              <Button onClick={() => navigate('/study')}>Start Studying</Button>
+              <>
+                <Button variant="light" onClick={() => navigate('/decks/my-people/new')}>Add Person</Button>
+                <Button onClick={() => navigate('/study')}>Start Studying</Button>
+              </>
             )}
           </Group>
         </Group>
 
         {deck.people.length === 0 ? (
           <Card shadow="sm" padding="xl" radius="md" withBorder>
-            <Text c="dimmed" ta="center">No one in this deck yet.</Text>
+            <Stack align="center" gap="sm">
+              <Text c="dimmed" ta="center">
+                {deck.type === 'virtual'
+                  ? 'Add the people you actually need to remember.'
+                  : 'No one in this deck yet.'}
+              </Text>
+              {deck.type === 'virtual' && (
+                <Button onClick={() => navigate('/decks/my-people/new')}>Add your first person</Button>
+              )}
+            </Stack>
           </Card>
         ) : (
           <SimpleGrid cols={{ base: 2, sm: 3, md: 4 }} spacing="md">
             {deck.people.map(person => (
-              <Stack key={person.id} align="center" gap={4}>
+              <Stack
+                key={person.id}
+                align="center"
+                gap={4}
+                style={deck.type === 'virtual' ? { cursor: 'pointer' } : undefined}
+                onClick={deck.type === 'virtual' ? () => navigate(`/decks/my-people/${person.id}`) : undefined}
+              >
                 <Avatar src={person.photo_path} size={90} radius="md">
                   {person.first_name[0]}{person.last_name?.[0] || ''}
                 </Avatar>
