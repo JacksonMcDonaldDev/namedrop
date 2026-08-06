@@ -86,7 +86,7 @@ export default function Study() {
               ? `Next card due ${new Date(nextDue).toLocaleDateString()}`
               : 'Add contacts with photos to start studying'}
           </Text>
-          <Button onClick={() => navigate('/')}>Back to Dashboard</Button>
+          <Button onClick={() => navigate('/')}>Back to Decks</Button>
         </Stack>
       </Container>
     );
@@ -220,7 +220,7 @@ function SessionSummaryView({ summary, onBack }: { summary: SessionSummary; onBa
           </Stack>
         </Card>
 
-        <Button size="lg" onClick={onBack}>Back to Dashboard</Button>
+        <Button size="lg" onClick={onBack}>Back to Decks</Button>
       </Stack>
     </Container>
   );

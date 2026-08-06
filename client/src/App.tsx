@@ -2,7 +2,7 @@ import { BrowserRouter, Routes, Route, Link, useLocation } from 'react-router-do
 import { MantineProvider, AppShell, Group, Anchor, Text, Button } from '@mantine/core';
 import { Notifications } from '@mantine/notifications';
 import { theme } from './theme';
-import Dashboard from './pages/Dashboard';
+import DeckBrowser from './pages/DeckBrowser';
 import ContactList from './pages/ContactList';
 import ContactForm from './pages/ContactForm';
 import Study from './pages/Study';
@@ -34,7 +34,7 @@ function AppContent() {
                 variant={location.pathname === '/' ? 'light' : 'subtle'}
                 size="sm"
               >
-                Study
+                Decks
               </Button>
               <Button
                 component={Link}
@@ -50,7 +50,7 @@ function AppContent() {
       )}
       <AppShell.Main>
         <Routes>
-          <Route path="/" element={<Dashboard />} />
+          <Route path="/" element={<DeckBrowser />} />
           <Route path="/contacts" element={<ContactList />} />
           <Route path="/contacts/new" element={<ContactForm />} />
           <Route path="/contacts/:id" element={<ContactForm />} />
