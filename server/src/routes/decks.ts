@@ -2,6 +2,7 @@ import { Router } from 'express';
 import * as decksModel from '../models/decks';
 import { validateUuidParam } from '../middleware/validation';
 import { AppError } from '../middleware/errorHandler';
+import practiceSessionsRouter from './practiceSessions';
 
 const router = Router();
 
@@ -36,5 +37,7 @@ router.get('/:id', validateUuidParam('id'), async (req, res, next) => {
     next(err);
   }
 });
+
+router.use('/:deckId/practice-sessions', practiceSessionsRouter);
 
 export default router;
