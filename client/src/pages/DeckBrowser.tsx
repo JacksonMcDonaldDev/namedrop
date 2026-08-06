@@ -69,7 +69,8 @@ export default function DeckBrowser() {
                       {deck.person_count} {deck.person_count === 1 ? 'person' : 'people'}
                     </Text>
                     <Text c="dimmed" size="sm">
-                      {deck.accuracy !== null ? `${deck.accuracy}% accuracy` : 'Not practiced yet'}
+                      {deck.accuracy !== null ? `${Math.round(deck.accuracy * 100)}% accuracy` : 'Not practiced yet'}
+                      {deck.last_practiced && ` · last practiced ${new Date(deck.last_practiced).toLocaleDateString()}`}
                     </Text>
                   </Stack>
                 </Card>

@@ -7,6 +7,7 @@ import DeckDetail from './pages/DeckDetail';
 import ContactList from './pages/ContactList';
 import ContactForm from './pages/ContactForm';
 import Study from './pages/Study';
+import Drill from './pages/Drill';
 import ErrorBoundary from './ErrorBoundary';
 
 import '@mantine/core/styles.css';
@@ -15,7 +16,7 @@ import '@mantine/dropzone/styles.css';
 
 function AppContent() {
   const location = useLocation();
-  const isStudying = location.pathname.startsWith('/study');
+  const isStudying = location.pathname.startsWith('/study') || /^\/decks\/[^/]+\/drill$/.test(location.pathname);
 
   return (
     <AppShell
@@ -53,6 +54,7 @@ function AppContent() {
         <Routes>
           <Route path="/" element={<DeckBrowser />} />
           <Route path="/decks/:id" element={<DeckDetail />} />
+          <Route path="/decks/:id/drill" element={<Drill />} />
           <Route path="/contacts" element={<ContactList />} />
           <Route path="/contacts/new" element={<ContactForm />} />
           <Route path="/contacts/:id" element={<ContactForm />} />

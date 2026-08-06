@@ -108,6 +108,29 @@ describe('GET /api/decks/:id', () => {
     });
   });
 
+  it('reflects accuracy and last_practiced from a completed drill session', async () => {
+    const { rows: deckRows } = await pool.query(
+      `INSERT INTO decks (type, name) VALUES ('prebuilt', 'Celebrities') RETURNING id`
+    );
+    const deckId = deckRows[0].id;
+    const { rows: personRows } = await pool.query(
+      `INSERT INTO deck_people (deck_id, first_name, last_name) VALUES ($1, 'Tom', 'Hanks') RETURNING id`,
+      [deckId]
+    );
+
+    const start = await request(app).post(`/api/decks/${deckId}/practice-sessions`);
+    const sessionId = start.body.id;
+    await request(app)
+      .post(`/api/decks/${deckId}/practice-sessions/${sessionId}/events`)
+      .send({ deck_person_id: personRows[0].id, result: 'got_it' });
+    await request(app).post(`/api/decks/${deckId}/practice-sessions/${sessionId}/complete`);
+
+    const res = await request(app).get(`/api/decks/${deckId}`);
+    expect(res.status).toBe(200);
+    expect(res.body.accuracy).toBe(1);
+    expect(res.body.last_practiced).not.toBeNull();
+  });
+
   it('returns 404 for a deck id that does not exist', async () => {
     const res = await request(app).get('/api/decks/00000000-0000-0000-0000-000000000000');
     expect(res.status).toBe(404);

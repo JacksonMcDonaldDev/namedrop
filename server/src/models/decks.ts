@@ -107,13 +107,15 @@ export async function getPrebuiltDeckDetail(id: string): Promise<PrebuiltDeckDet
     [id]
   );
 
+  const progress = await getDeckProgress(id);
+
   return {
     id: deckRows[0].id,
     type: 'prebuilt',
     name: deckRows[0].name,
     person_count: people.length,
-    last_practiced: null,
-    accuracy: null,
+    last_practiced: progress.last_practiced,
+    accuracy: progress.accuracy,
     people,
   };
 }

@@ -97,13 +97,17 @@ export default function DeckDetail() {
             <Text c="dimmed" size="sm">
               {deck.person_count} {deck.person_count === 1 ? 'person' : 'people'}
               {deck.type === 'virtual' && deck.due_count > 0 && ` · ${deck.due_count} due`}
-              {deck.type === 'prebuilt' && deck.accuracy !== null && ` · ${deck.accuracy}% accuracy`}
+              {deck.type === 'prebuilt' && deck.accuracy !== null && ` · ${Math.round(deck.accuracy * 100)}% accuracy`}
+              {deck.type === 'prebuilt' && deck.last_practiced && ` · last practiced ${new Date(deck.last_practiced).toLocaleDateString()}`}
             </Text>
           </div>
           <Group gap="xs">
             <Button variant="light" onClick={() => setTipsOpen(true)}>Technique Tips</Button>
             {deck.type === 'virtual' && (
               <Button onClick={() => navigate('/study')}>Start Studying</Button>
+            )}
+            {deck.type === 'prebuilt' && deck.person_count > 0 && (
+              <Button onClick={() => navigate(`/decks/${deck.id}/drill`)}>Start Session</Button>
             )}
           </Group>
         </Group>
