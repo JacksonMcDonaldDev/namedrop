@@ -42,6 +42,83 @@ describe('GET /api/decks', () => {
   });
 });
 
+describe('GET /api/decks/my-people', () => {
+  it('returns the virtual deck detail sourced from contacts', async () => {
+    const contact = await request(app)
+      .post('/api/contacts')
+      .send({ first_name: 'Ada', last_name: 'Lovelace', mnemonic: 'Countess of computing', photo_path: '/uploads/photos/ada.jpg' });
+    expect(contact.status).toBe(201);
+
+    const res = await request(app).get('/api/decks/my-people');
+    expect(res.status).toBe(200);
+    expect(res.body).toEqual({
+      id: 'my-people',
+      type: 'virtual',
+      name: 'My People',
+      person_count: 1,
+      due_count: 1,
+      people: [
+        {
+          id: contact.body.id,
+          first_name: 'Ada',
+          last_name: 'Lovelace',
+          photo_path: '/uploads/photos/ada.jpg',
+          mnemonic: 'Countess of computing',
+        },
+      ],
+    });
+  });
+});
+
+describe('GET /api/decks/:id', () => {
+  it('returns prebuilt deck detail including attribution fields for people', async () => {
+    const { rows: deckRows } = await pool.query(
+      `INSERT INTO decks (type, name) VALUES ('prebuilt', 'Celebrities') RETURNING id`
+    );
+    const deckId = deckRows[0].id;
+    const { rows: personRows } = await pool.query(
+      `INSERT INTO deck_people
+         (deck_id, first_name, last_name, photo_path, mnemonic, attribution_author, attribution_source_url, attribution_license)
+       VALUES ($1, 'Tom', 'Hanks', '/uploads/decks/tom-hanks.jpg', null, 'Some Author', 'https://commons.wikimedia.org/x', 'CC BY-SA 4.0')
+       RETURNING id`,
+      [deckId]
+    );
+
+    const res = await request(app).get(`/api/decks/${deckId}`);
+    expect(res.status).toBe(200);
+    expect(res.body).toEqual({
+      id: deckId,
+      type: 'prebuilt',
+      name: 'Celebrities',
+      person_count: 1,
+      last_practiced: null,
+      accuracy: null,
+      people: [
+        {
+          id: personRows[0].id,
+          first_name: 'Tom',
+          last_name: 'Hanks',
+          photo_path: '/uploads/decks/tom-hanks.jpg',
+          mnemonic: null,
+          attribution_author: 'Some Author',
+          attribution_source_url: 'https://commons.wikimedia.org/x',
+          attribution_license: 'CC BY-SA 4.0',
+        },
+      ],
+    });
+  });
+
+  it('returns 404 for a deck id that does not exist', async () => {
+    const res = await request(app).get('/api/decks/00000000-0000-0000-0000-000000000000');
+    expect(res.status).toBe(404);
+  });
+
+  it('returns 400 for a malformed deck id', async () => {
+    const res = await request(app).get('/api/decks/not-a-uuid');
+    expect(res.status).toBe(400);
+  });
+});
+
 describe('deck_people isolation', () => {
   it('never appears in the contacts list or the SM-2 due queue', async () => {
     await request(app)

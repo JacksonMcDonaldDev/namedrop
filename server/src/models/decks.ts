@@ -18,6 +18,28 @@ export interface PrebuiltDeckSummary {
   accuracy: number | null;
 }
 
+export interface DeckPerson {
+  id: string;
+  first_name: string;
+  last_name: string | null;
+  photo_path: string | null;
+  mnemonic: string | null;
+}
+
+export interface PrebuiltDeckPerson extends DeckPerson {
+  attribution_author: string | null;
+  attribution_source_url: string | null;
+  attribution_license: string | null;
+}
+
+export interface VirtualDeckDetail extends VirtualDeckSummary {
+  people: DeckPerson[];
+}
+
+export interface PrebuiltDeckDetail extends PrebuiltDeckSummary {
+  people: PrebuiltDeckPerson[];
+}
+
 export async function getMyPeopleDeck(): Promise<VirtualDeckSummary> {
   const { rows } = await pool.query(
     `SELECT COUNT(*)::int as count FROM contacts WHERE is_placeholder = false`
@@ -51,4 +73,43 @@ export async function listPrebuiltDecks(): Promise<PrebuiltDeckSummary[]> {
     last_practiced: null,
     accuracy: null,
   }));
+}
+
+export async function getMyPeopleDeckDetail(): Promise<VirtualDeckDetail> {
+  const summary = await getMyPeopleDeck();
+  const { rows: people } = await pool.query(
+    `SELECT id, first_name, last_name, photo_path, mnemonic
+     FROM contacts
+     WHERE is_placeholder = false
+     ORDER BY created_at DESC`
+  );
+
+  return { ...summary, people };
+}
+
+export async function getPrebuiltDeckDetail(id: string): Promise<PrebuiltDeckDetail | null> {
+  const { rows: deckRows } = await pool.query(
+    `SELECT id, name FROM decks WHERE id = $1 AND type = 'prebuilt'`,
+    [id]
+  );
+  if (!deckRows[0]) return null;
+
+  const { rows: people } = await pool.query(
+    `SELECT id, first_name, last_name, photo_path, mnemonic,
+            attribution_author, attribution_source_url, attribution_license
+     FROM deck_people
+     WHERE deck_id = $1
+     ORDER BY created_at ASC`,
+    [id]
+  );
+
+  return {
+    id: deckRows[0].id,
+    type: 'prebuilt',
+    name: deckRows[0].name,
+    person_count: people.length,
+    last_practiced: null,
+    accuracy: null,
+    people,
+  };
 }

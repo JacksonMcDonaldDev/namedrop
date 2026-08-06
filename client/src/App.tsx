@@ -3,6 +3,7 @@ import { MantineProvider, AppShell, Group, Anchor, Text, Button } from '@mantine
 import { Notifications } from '@mantine/notifications';
 import { theme } from './theme';
 import DeckBrowser from './pages/DeckBrowser';
+import DeckDetail from './pages/DeckDetail';
 import ContactList from './pages/ContactList';
 import ContactForm from './pages/ContactForm';
 import Study from './pages/Study';
@@ -51,6 +52,7 @@ function AppContent() {
       <AppShell.Main>
         <Routes>
           <Route path="/" element={<DeckBrowser />} />
+          <Route path="/decks/:id" element={<DeckDetail />} />
           <Route path="/contacts" element={<ContactList />} />
           <Route path="/contacts/new" element={<ContactForm />} />
           <Route path="/contacts/:id" element={<ContactForm />} />
