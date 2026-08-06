@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import * as decksModel from '../models/decks';
+import practiceSessionsRouter from './practiceSessions';
 
 const router = Router();
 
@@ -13,5 +14,7 @@ router.get('/', async (_req, res, next) => {
     next(err);
   }
 });
+
+router.use('/:deckId/practice-sessions', practiceSessionsRouter);
 
 export default router;
