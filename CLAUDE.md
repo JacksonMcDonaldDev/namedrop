@@ -22,12 +22,15 @@ cd client && npx tsc --noEmit
 # Server type checking
 cd server && npx tsc --noEmit
 
+# Server tests (supertest over HTTP against a real test database; needs the compose db up)
+cd server && npm test
+
 # Database access
 docker compose exec db psql -U namedrop -d namedrop
 ```
 
 ## Key paths
-- Server entry: `server/src/app.ts`
+- Server entry: `server/src/server.ts` (boot + migrations); the Express app itself is `server/src/app.ts`
 - API routes: `server/src/routes/`
 - Client entry: `client/src/main.tsx`
 - Client API layer: `client/src/api/`

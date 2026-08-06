@@ -38,11 +38,6 @@ export interface SessionSummary {
   easy: number;
 }
 
-export interface StudyStatus {
-  due_count: number;
-  next_due: string | null;
-}
-
 export async function startSession(): Promise<SessionStartResponse> {
   const res = await fetch(`${BASE}/sessions`, { method: 'POST' });
   if (!res.ok) throw await apiError(res, 'Failed to start session');
@@ -68,11 +63,5 @@ export async function submitReview(sessionId: string, contactId: string, rating:
 export async function completeSession(sessionId: string): Promise<SessionSummary> {
   const res = await fetch(`${BASE}/sessions/${sessionId}/complete`, { method: 'POST' });
   if (!res.ok) throw await apiError(res, 'Failed to complete session');
-  return res.json();
-}
-
-export async function getStudyStatus(): Promise<StudyStatus> {
-  const res = await fetch(`${BASE}/status`);
-  if (!res.ok) throw await apiError(res, 'Failed to get study status');
   return res.json();
 }

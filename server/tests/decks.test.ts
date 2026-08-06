@@ -142,6 +142,52 @@ describe('GET /api/decks/:id', () => {
   });
 });
 
+describe('deck listing progress', () => {
+  it('keeps each deck listing row on its own progress when several decks have been drilled', async () => {
+    async function seedDeck(name: string) {
+      const { rows: deckRows } = await pool.query(
+        `INSERT INTO decks (type, name) VALUES ('prebuilt', $1) RETURNING id`,
+        [name]
+      );
+      const { rows: personRows } = await pool.query(
+        `INSERT INTO deck_people (deck_id, first_name, last_name)
+         VALUES ($1, 'Tom', 'Hanks'), ($1, 'Meryl', 'Streep') RETURNING id`,
+        [deckRows[0].id]
+      );
+      return { deckId: deckRows[0].id, personIds: personRows.map((r: { id: string }) => r.id) };
+    }
+
+    const perfect = await seedDeck('Celebrities');
+    const halved = await seedDeck('Coworkers');
+    const untouched = await seedDeck('Neighbours');
+
+    async function drill(deckId: string, results: string[], personIds: string[]) {
+      const start = await request(app).post(`/api/decks/${deckId}/practice-sessions`);
+      for (const [i, result] of results.entries()) {
+        await request(app)
+          .post(`/api/decks/${deckId}/practice-sessions/${start.body.id}/events`)
+          .send({ deck_person_id: personIds[i], result });
+      }
+      await request(app).post(`/api/decks/${deckId}/practice-sessions/${start.body.id}/complete`);
+    }
+
+    await drill(perfect.deckId, ['got_it', 'got_it'], perfect.personIds);
+    await drill(halved.deckId, ['got_it', 'missed_it'], halved.personIds);
+
+    const res = await request(app).get('/api/decks');
+    expect(res.status).toBe(200);
+    const byId = new Map(res.body.map((d: { id: string }) => [d.id, d]));
+    expect(byId.get(perfect.deckId)).toMatchObject({ name: 'Celebrities', accuracy: 1 });
+    expect(byId.get(halved.deckId)).toMatchObject({ name: 'Coworkers', accuracy: 0.5 });
+    expect(byId.get(untouched.deckId)).toMatchObject({
+      name: 'Neighbours',
+      last_practiced: null,
+      accuracy: null,
+    });
+    expect((byId.get(perfect.deckId) as { last_practiced: string | null }).last_practiced).not.toBeNull();
+  });
+});
+
 describe('deck_people isolation', () => {
   it('never appears in the contacts list or the SM-2 due queue', async () => {
     await request(app)

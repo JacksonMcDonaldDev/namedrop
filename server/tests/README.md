@@ -36,6 +36,31 @@ Tests never touch the dev database. `DATABASE_URL`'s database name gets `_test` 
   pool after each file's tests finish (`afterAll`). New tables added by future migrations are picked
   up automatically — nothing to update here when the schema grows.
 
+## Patterns worth reusing
+
+**Binary fixtures are generated, not committed.** `sharp` is a server dependency, so an upload test
+builds its own image in-process and hands it to supertest's `.attach()`:
+
+```ts
+const jpeg = await sharp({ create: { width: 8, height: 8, channels: 3, background: '#c81e1e' } })
+  .jpeg().toBuffer();
+await request(app).post('/api/contacts').field('first_name', 'Ada').attach('photo', jpeg, 'ada.jpg');
+```
+
+Uploads land in `server/uploads/photos`, which the `beforeEach` truncate does not reach — an upload
+test must delete what it wrote in its own `afterEach` (see `contacts.test.ts`).
+
+**Planting state no route can produce.** A few behaviors only show up on data that predates the
+request under test — e.g. an SM-2 card whose `due_at` is in the past, which no review can create
+because every review schedules at least a day out. Those fixtures are inserted directly into the
+tables the migrations define, and only the fixture is direct: every assertion still goes over HTTP
+(see `plantContactWithHistory` in `study.test.ts`).
+
+**Tests never touch the network.** `POST /api/linkedin/scrape` fetches linkedin.com for any
+well-formed profile URL, so `linkedin.test.ts` covers only what the service rejects locally, before
+its first `fetch()`: missing, non-string, and malformed URLs. Response parsing stays uncovered
+rather than being tested against a live third party.
+
 ## Running
 
 ```bash

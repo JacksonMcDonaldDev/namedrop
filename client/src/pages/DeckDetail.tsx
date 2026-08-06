@@ -30,7 +30,7 @@ const TECHNIQUE_TIPS = [
   },
 ];
 
-function tipsSeenKey(deckId: string) {
+export function tipsSeenKey(deckId: string) {
   return `namedrop:tipsSeen:${deckId}`;
 }
 

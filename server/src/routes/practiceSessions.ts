@@ -1,5 +1,5 @@
 import { Request, Router } from 'express';
-import * as model from '../models/practiceSessions';
+import * as practiceSessionsModel from '../models/practiceSessions';
 import { validateUuidParam, UUID_REGEX } from '../middleware/validation';
 import { AppError } from '../middleware/errorHandler';
 
@@ -14,17 +14,16 @@ const RESULT_VALUES = ['got_it', 'missed_it'];
 
 router.use(validateUuidParam('deckId'));
 
-async function loadDrillableDeck(deckId: string): Promise<model.Deck> {
-  const deck = await model.getDeck(deckId);
+async function assertDrillableDeck(deckId: string): Promise<void> {
+  const deck = await practiceSessionsModel.getDeck(deckId);
   if (!deck) throw new AppError(404, 'Deck not found');
   if (deck.type !== 'prebuilt') {
     throw new AppError(400, 'Only prebuilt decks support practice sessions');
   }
-  return deck;
 }
 
-async function loadOpenSession(sessionId: string, deckId: string): Promise<model.PracticeSession> {
-  const session = await model.getSessionForDeck(sessionId, deckId);
+async function loadOpenSession(sessionId: string, deckId: string): Promise<practiceSessionsModel.PracticeSession> {
+  const session = await practiceSessionsModel.getSessionForDeck(sessionId, deckId);
   if (!session) throw new AppError(404, 'Practice session not found');
   if (session.completed_at) throw new AppError(400, 'Practice session is already complete');
   return session;
@@ -33,9 +32,27 @@ async function loadOpenSession(sessionId: string, deckId: string): Promise<model
 // POST /decks/:deckId/practice-sessions — start a drill session
 router.post('/', async (req: Request<DeckParams>, res, next) => {
   try {
-    await loadDrillableDeck(req.params.deckId);
-    const session = await model.createSession(req.params.deckId);
+    await assertDrillableDeck(req.params.deckId);
+    const session = await practiceSessionsModel.createSession(req.params.deckId);
     res.status(201).json(session);
+  } catch (err) {
+    next(err);
+  }
+});
+
+// GET /decks/:deckId/practice-sessions/:sessionId — fetch a session and its summary.
+// Deliberately not routed through loadOpenSession: this has to answer for
+// in-flight sessions *and* completed ones, so a summary survives a lost
+// response to /complete.
+router.get('/:sessionId', validateUuidParam('sessionId'), async (req: Request<SessionParams>, res, next) => {
+  try {
+    await assertDrillableDeck(req.params.deckId);
+
+    const session = await practiceSessionsModel.getSessionForDeck(req.params.sessionId, req.params.deckId);
+    if (!session) throw new AppError(404, 'Practice session not found');
+
+    const summary = await practiceSessionsModel.getSessionSummary(req.params.sessionId);
+    res.json({ session, summary });
   } catch (err) {
     next(err);
   }
@@ -44,7 +61,7 @@ router.post('/', async (req: Request<DeckParams>, res, next) => {
 // POST /decks/:deckId/practice-sessions/:sessionId/events — submit a got-it/missed-it event
 router.post('/:sessionId/events', validateUuidParam('sessionId'), async (req: Request<SessionParams>, res, next) => {
   try {
-    await loadDrillableDeck(req.params.deckId);
+    await assertDrillableDeck(req.params.deckId);
     await loadOpenSession(req.params.sessionId, req.params.deckId);
 
     const { deck_person_id, result } = req.body;
@@ -55,10 +72,10 @@ router.post('/:sessionId/events', validateUuidParam('sessionId'), async (req: Re
       throw new AppError(400, 'result must be "got_it" or "missed_it"');
     }
 
-    const inDeck = await model.isPersonInDeck(req.params.deckId, deck_person_id);
+    const inDeck = await practiceSessionsModel.isPersonInDeck(req.params.deckId, deck_person_id);
     if (!inDeck) throw new AppError(400, 'Person is not in this deck');
 
-    const event = await model.createEvent(req.params.sessionId, deck_person_id, result);
+    const event = await practiceSessionsModel.createEvent(req.params.sessionId, deck_person_id, result);
     res.status(201).json(event);
   } catch (err) {
     next(err);
@@ -68,11 +85,11 @@ router.post('/:sessionId/events', validateUuidParam('sessionId'), async (req: Re
 // POST /decks/:deckId/practice-sessions/:sessionId/complete — end the session, return the summary
 router.post('/:sessionId/complete', validateUuidParam('sessionId'), async (req: Request<SessionParams>, res, next) => {
   try {
-    await loadDrillableDeck(req.params.deckId);
+    await assertDrillableDeck(req.params.deckId);
     await loadOpenSession(req.params.sessionId, req.params.deckId);
 
-    await model.completeSession(req.params.sessionId);
-    const summary = await model.getSessionSummary(req.params.sessionId);
+    await practiceSessionsModel.completeSession(req.params.sessionId);
+    const summary = await practiceSessionsModel.getSessionSummary(req.params.sessionId);
     res.json(summary);
   } catch (err) {
     next(err);

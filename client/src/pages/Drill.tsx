@@ -41,11 +41,19 @@ export default function Drill() {
         const deck = await getDeckDetail(deckId);
         if (deck.type !== 'prebuilt') throw new Error('This deck does not support drill sessions');
 
-        const session = await startDrillSession(deckId);
         setDeckName(deck.name);
+
+        // Don't open a practice session for a deck with nobody in it — it would
+        // never be completed and would leave an open row behind.
+        if (deck.people.length === 0) {
+          setState('complete');
+          return;
+        }
+
+        const session = await startDrillSession(deckId);
         setSessionId(session.id);
         setQueue(shuffled(deck.people));
-        setState(deck.people.length > 0 ? 'front' : 'complete');
+        setState('front');
       } catch (err) {
         console.error(err);
         setState('error');
@@ -58,6 +66,17 @@ export default function Drill() {
   const current = queue[index];
 
   const handleReveal = () => setState('back');
+
+  const handleQuit = async () => {
+    if (id && sessionId) {
+      try {
+        await completeDrillSession(id, sessionId);
+      } catch {
+        // ignore — quitting should never strand the user on the drill screen
+      }
+    }
+    navigate(`/decks/${id}`);
+  };
 
   const handleMark = async (result: DrillResult) => {
     if (!id || !sessionId || !current) return;
@@ -111,7 +130,7 @@ export default function Drill() {
       <Stack align="center" gap="lg">
         <Group justify="space-between" w="100%">
           <Text size="sm" c="dimmed">{index + 1} of {queue.length}</Text>
-          <Button variant="subtle" size="xs" onClick={() => navigate(`/decks/${id}`)}>Quit</Button>
+          <Button variant="subtle" size="xs" onClick={handleQuit}>Quit</Button>
         </Group>
 
         <Card shadow="md" padding={0} radius="lg" withBorder w="100%" maw={400}>

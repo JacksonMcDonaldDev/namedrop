@@ -1,5 +1,7 @@
 import { apiError } from './fetch';
 
+const sessionsBase = (deckId: string) => `/api/decks/${deckId}/practice-sessions`;
+
 export interface PracticeSession {
   id: string;
   deck_id: string;
@@ -25,7 +27,7 @@ export interface DrillSummary {
 }
 
 export async function startDrillSession(deckId: string): Promise<PracticeSession> {
-  const res = await fetch(`/api/decks/${deckId}/practice-sessions`, { method: 'POST' });
+  const res = await fetch(sessionsBase(deckId), { method: 'POST' });
   if (!res.ok) throw await apiError(res, 'Failed to start drill session');
   return res.json();
 }
@@ -36,7 +38,7 @@ export async function submitDrillEvent(
   deckPersonId: string,
   result: DrillResult
 ): Promise<PracticeEvent> {
-  const res = await fetch(`/api/decks/${deckId}/practice-sessions/${sessionId}/events`, {
+  const res = await fetch(`${sessionsBase(deckId)}/${sessionId}/events`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ deck_person_id: deckPersonId, result }),
@@ -46,7 +48,7 @@ export async function submitDrillEvent(
 }
 
 export async function completeDrillSession(deckId: string, sessionId: string): Promise<DrillSummary> {
-  const res = await fetch(`/api/decks/${deckId}/practice-sessions/${sessionId}/complete`, { method: 'POST' });
+  const res = await fetch(`${sessionsBase(deckId)}/${sessionId}/complete`, { method: 'POST' });
   if (!res.ok) throw await apiError(res, 'Failed to complete drill session');
   return res.json();
 }

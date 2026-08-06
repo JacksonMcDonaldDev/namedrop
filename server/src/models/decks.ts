@@ -1,6 +1,6 @@
 import pool from '../db';
 import { getStudyStatus } from './study';
-import { getDeckProgress } from './practiceSessions';
+import { getDeckProgress, getDeckProgressMap } from './practiceSessions';
 
 export interface VirtualDeckSummary {
   id: 'my-people';
@@ -66,8 +66,10 @@ export async function listPrebuiltDecks(): Promise<PrebuiltDeckSummary[]> {
     ORDER BY d.created_at ASC
   `);
 
-  return Promise.all(rows.map(async row => {
-    const progress = await getDeckProgress(row.id);
+  const progressByDeck = await getDeckProgressMap(rows.map(row => row.id));
+
+  return rows.map(row => {
+    const progress = progressByDeck.get(row.id)!;
     return {
       id: row.id,
       type: 'prebuilt' as const,
@@ -76,7 +78,7 @@ export async function listPrebuiltDecks(): Promise<PrebuiltDeckSummary[]> {
       last_practiced: progress.last_practiced,
       accuracy: progress.accuracy,
     };
-  }));
+  });
 }
 
 export async function getMyPeopleDeckDetail(): Promise<VirtualDeckDetail> {

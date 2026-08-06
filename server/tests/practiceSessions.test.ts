@@ -124,6 +124,103 @@ describe('Drill lifecycle', () => {
     }
   });
 
+  describe('GET /decks/:deckId/practice-sessions/:sessionId', () => {
+    it('returns the session and a running summary while the session is still in flight', async () => {
+      const { deckId, personIds } = await seedPrebuiltDeck();
+      const start = await request(app).post(`/api/decks/${deckId}/practice-sessions`);
+      const sessionId = start.body.id;
+
+      await request(app)
+        .post(`/api/decks/${deckId}/practice-sessions/${sessionId}/events`)
+        .send({ deck_person_id: personIds[0], result: 'got_it' });
+      await request(app)
+        .post(`/api/decks/${deckId}/practice-sessions/${sessionId}/events`)
+        .send({ deck_person_id: personIds[1], result: 'missed_it' });
+
+      const res = await request(app).get(`/api/decks/${deckId}/practice-sessions/${sessionId}`);
+      expect(res.status).toBe(200);
+      expect(res.body.session).toMatchObject({ id: sessionId, deck_id: deckId, completed_at: null });
+      expect(res.body.summary).toEqual({ total: 2, got_it: 1, missed_it: 1, accuracy: 0.5 });
+    });
+
+    it('still returns the summary after the session is complete, so a lost /complete response is recoverable', async () => {
+      const { deckId, personIds } = await seedPrebuiltDeck();
+      const start = await request(app).post(`/api/decks/${deckId}/practice-sessions`);
+      const sessionId = start.body.id;
+
+      await request(app)
+        .post(`/api/decks/${deckId}/practice-sessions/${sessionId}/events`)
+        .send({ deck_person_id: personIds[0], result: 'got_it' });
+      const complete = await request(app).post(`/api/decks/${deckId}/practice-sessions/${sessionId}/complete`);
+      expect(complete.status).toBe(200);
+
+      const res = await request(app).get(`/api/decks/${deckId}/practice-sessions/${sessionId}`);
+      expect(res.status).toBe(200);
+      expect(res.body.session.id).toBe(sessionId);
+      expect(res.body.session.completed_at).not.toBeNull();
+      expect(res.body.summary).toEqual(complete.body);
+    });
+
+    it('returns 404 for an unknown session id', async () => {
+      const { deckId } = await seedPrebuiltDeck();
+      const res = await request(app).get(
+        `/api/decks/${deckId}/practice-sessions/00000000-0000-0000-0000-000000000000`
+      );
+      expect(res.status).toBe(404);
+    });
+
+    it('returns 404 for a session belonging to a different deck', async () => {
+      const { deckId } = await seedPrebuiltDeck();
+      const other = await seedPrebuiltDeck('Other Deck');
+      const start = await request(app).post(`/api/decks/${other.deckId}/practice-sessions`);
+
+      const res = await request(app).get(`/api/decks/${deckId}/practice-sessions/${start.body.id}`);
+      expect(res.status).toBe(404);
+    });
+
+    it('returns 400 for a malformed session id', async () => {
+      const { deckId } = await seedPrebuiltDeck();
+      const res = await request(app).get(`/api/decks/${deckId}/practice-sessions/not-a-uuid`);
+      expect(res.status).toBe(400);
+    });
+  });
+
+  describe('deck progress', () => {
+    it('ignores a later session completed with zero events rather than wiping the last real score', async () => {
+      const { deckId, personIds } = await seedPrebuiltDeck();
+
+      const first = await request(app).post(`/api/decks/${deckId}/practice-sessions`);
+      await request(app)
+        .post(`/api/decks/${deckId}/practice-sessions/${first.body.id}/events`)
+        .send({ deck_person_id: personIds[0], result: 'got_it' });
+      await request(app)
+        .post(`/api/decks/${deckId}/practice-sessions/${first.body.id}/events`)
+        .send({ deck_person_id: personIds[1], result: 'missed_it' });
+      await request(app).post(`/api/decks/${deckId}/practice-sessions/${first.body.id}/complete`);
+
+      const detailAfterFirst = await request(app).get(`/api/decks/${deckId}`);
+      const lastPracticed = detailAfterFirst.body.last_practiced;
+      expect(detailAfterFirst.body.accuracy).toBeCloseTo(0.5);
+      expect(lastPracticed).not.toBeNull();
+
+      // A drill the user opened and abandoned without answering anybody.
+      const empty = await request(app).post(`/api/decks/${deckId}/practice-sessions`);
+      const emptyComplete = await request(app).post(
+        `/api/decks/${deckId}/practice-sessions/${empty.body.id}/complete`
+      );
+      expect(emptyComplete.body).toEqual({ total: 0, got_it: 0, missed_it: 0, accuracy: null });
+
+      const detail = await request(app).get(`/api/decks/${deckId}`);
+      expect(detail.body.accuracy).toBeCloseTo(0.5);
+      expect(detail.body.last_practiced).toBe(lastPracticed);
+
+      const listing = await request(app).get('/api/decks');
+      const deckRow = listing.body.find((d: { id: string }) => d.id === deckId);
+      expect(deckRow.accuracy).toBeCloseTo(0.5);
+      expect(deckRow.last_practiced).toBe(lastPracticed);
+    });
+  });
+
   describe('invalid flows', () => {
     it('rejects an event for a person not in the deck', async () => {
       const { deckId } = await seedPrebuiltDeck();

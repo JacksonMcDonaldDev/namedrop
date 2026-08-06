@@ -1,8 +1,41 @@
 import { useEffect, useState } from 'react';
+import type { ReactNode } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Container, Title, Text, Button, Stack, Card, Group, Skeleton, SimpleGrid, Badge } from '@mantine/core';
 import { listDecks } from '../api/decks';
 import type { DeckSummary } from '../api/decks';
+import { tipsSeenKey } from './DeckDetail';
+
+function DeckCard({
+  deck, badge, footer, onClick,
+}: {
+  deck: DeckSummary;
+  badge?: ReactNode;
+  footer?: ReactNode;
+  onClick: () => void;
+}) {
+  return (
+    <Card
+      shadow="sm"
+      padding="lg"
+      radius="md"
+      withBorder
+      style={{ cursor: 'pointer' }}
+      onClick={onClick}
+    >
+      <Stack gap="sm">
+        <Group justify="space-between">
+          <Text fw={600} size="lg">{deck.name}</Text>
+          {badge}
+        </Group>
+        <Text c="dimmed" size="sm">
+          {deck.person_count} {deck.person_count === 1 ? 'person' : 'people'}
+        </Text>
+        {footer}
+      </Stack>
+    </Card>
+  );
+}
 
 export default function DeckBrowser() {
   const navigate = useNavigate();
@@ -15,6 +48,16 @@ export default function DeckBrowser() {
       .catch(console.error)
       .finally(() => setLoading(false));
   }, []);
+
+  // Story 9: the technique tips only auto-open on the deck detail page, so send
+  // first-timers there instead of straight into a study session.
+  const handleStudyNow = (deckId: string) => {
+    if (localStorage.getItem(tipsSeenKey(deckId))) {
+      navigate('/study');
+    } else {
+      navigate(`/decks/${deckId}`);
+    }
+  };
 
   return (
     <Container size="md" py="xl">
@@ -31,51 +74,28 @@ export default function DeckBrowser() {
           </SimpleGrid>
         ) : (
           <SimpleGrid cols={{ base: 1, sm: 2 }}>
-            {decks?.map(deck =>
-              deck.type === 'virtual' ? (
-                <Card
-                  key={deck.id}
-                  shadow="sm"
-                  padding="lg"
-                  radius="md"
-                  withBorder
-                  style={{ cursor: 'pointer' }}
-                  onClick={() => navigate(`/decks/${deck.id}`)}
-                >
-                  <Stack gap="sm">
-                    <Group justify="space-between">
-                      <Text fw={600} size="lg">{deck.name}</Text>
-                      {deck.due_count > 0 && <Badge color="blue">{deck.due_count} due</Badge>}
-                    </Group>
-                    <Text c="dimmed" size="sm">
-                      {deck.person_count} {deck.person_count === 1 ? 'person' : 'people'}
-                    </Text>
-                    <Button onClick={(e) => { e.stopPropagation(); navigate('/study'); }}>Study Now</Button>
-                  </Stack>
-                </Card>
-              ) : (
-                <Card
-                  key={deck.id}
-                  shadow="sm"
-                  padding="lg"
-                  radius="md"
-                  withBorder
-                  style={{ cursor: 'pointer' }}
-                  onClick={() => navigate(`/decks/${deck.id}`)}
-                >
-                  <Stack gap="sm">
-                    <Text fw={600} size="lg">{deck.name}</Text>
-                    <Text c="dimmed" size="sm">
-                      {deck.person_count} {deck.person_count === 1 ? 'person' : 'people'}
-                    </Text>
+            {decks?.map(deck => (
+              <DeckCard
+                key={deck.id}
+                deck={deck}
+                onClick={() => navigate(`/decks/${deck.id}`)}
+                badge={
+                  deck.type === 'virtual' && deck.due_count > 0
+                    ? <Badge color="blue">{deck.due_count} due</Badge>
+                    : undefined
+                }
+                footer={
+                  deck.type === 'virtual' ? (
+                    <Button onClick={(e) => { e.stopPropagation(); handleStudyNow(deck.id); }}>Study Now</Button>
+                  ) : (
                     <Text c="dimmed" size="sm">
                       {deck.accuracy !== null ? `${Math.round(deck.accuracy * 100)}% accuracy` : 'Not practiced yet'}
                       {deck.last_practiced && ` · last practiced ${new Date(deck.last_practiced).toLocaleDateString()}`}
                     </Text>
-                  </Stack>
-                </Card>
-              )
-            )}
+                  )
+                }
+              />
+            ))}
           </SimpleGrid>
         )}
       </Stack>

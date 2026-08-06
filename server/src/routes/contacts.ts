@@ -16,7 +16,9 @@ const upload = multer({
     if (['image/jpeg', 'image/png', 'image/webp'].includes(file.mimetype)) {
       cb(null, true);
     } else {
-      cb(new Error('Only JPEG, PNG, and WebP images are allowed'));
+      // AppError, not a bare Error — the error handler only maps AppError and
+      // MulterError to a status; anything else falls through to a 500.
+      cb(new AppError(400, 'Only JPEG, PNG, and WebP images are allowed'));
     }
   },
 });
