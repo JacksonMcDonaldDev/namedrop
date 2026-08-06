@@ -33,7 +33,15 @@ export default function DeckBrowser() {
           <SimpleGrid cols={{ base: 1, sm: 2 }}>
             {decks?.map(deck =>
               deck.type === 'virtual' ? (
-                <Card key={deck.id} shadow="sm" padding="lg" radius="md" withBorder>
+                <Card
+                  key={deck.id}
+                  shadow="sm"
+                  padding="lg"
+                  radius="md"
+                  withBorder
+                  style={{ cursor: 'pointer' }}
+                  onClick={() => navigate(`/decks/${deck.id}`)}
+                >
                   <Stack gap="sm">
                     <Group justify="space-between">
                       <Text fw={600} size="lg">{deck.name}</Text>
@@ -42,11 +50,19 @@ export default function DeckBrowser() {
                     <Text c="dimmed" size="sm">
                       {deck.person_count} {deck.person_count === 1 ? 'person' : 'people'}
                     </Text>
-                    <Button onClick={() => navigate('/study')}>Study Now</Button>
+                    <Button onClick={(e) => { e.stopPropagation(); navigate('/study'); }}>Study Now</Button>
                   </Stack>
                 </Card>
               ) : (
-                <Card key={deck.id} shadow="sm" padding="lg" radius="md" withBorder>
+                <Card
+                  key={deck.id}
+                  shadow="sm"
+                  padding="lg"
+                  radius="md"
+                  withBorder
+                  style={{ cursor: 'pointer' }}
+                  onClick={() => navigate(`/decks/${deck.id}`)}
+                >
                   <Stack gap="sm">
                     <Text fw={600} size="lg">{deck.name}</Text>
                     <Text c="dimmed" size="sm">
