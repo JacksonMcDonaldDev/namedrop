@@ -4,7 +4,6 @@ import { Notifications } from '@mantine/notifications';
 import { theme } from './theme';
 import DeckBrowser from './pages/DeckBrowser';
 import DeckDetail from './pages/DeckDetail';
-import ContactList from './pages/ContactList';
 import ContactForm from './pages/ContactForm';
 import Study from './pages/Study';
 import Drill from './pages/Drill';
@@ -38,14 +37,6 @@ function AppContent() {
               >
                 Decks
               </Button>
-              <Button
-                component={Link}
-                to="/contacts"
-                variant={location.pathname.startsWith('/contacts') ? 'light' : 'subtle'}
-                size="sm"
-              >
-                Contacts
-              </Button>
             </Group>
           </Group>
         </AppShell.Header>
@@ -53,11 +44,10 @@ function AppContent() {
       <AppShell.Main>
         <Routes>
           <Route path="/" element={<DeckBrowser />} />
+          <Route path="/decks/my-people/new" element={<ContactForm />} />
+          <Route path="/decks/my-people/:personId" element={<ContactForm />} />
           <Route path="/decks/:id" element={<DeckDetail />} />
           <Route path="/decks/:id/drill" element={<Drill />} />
-          <Route path="/contacts" element={<ContactList />} />
-          <Route path="/contacts/new" element={<ContactForm />} />
-          <Route path="/contacts/:id" element={<ContactForm />} />
           <Route path="/study" element={<Study />} />
         </Routes>
       </AppShell.Main>
