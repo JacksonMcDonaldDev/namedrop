@@ -1,0 +1,184 @@
+[
+  {
+    "first_name": "Tom",
+    "last_name": "Hanks",
+    "tier": "recognizable",
+    "image_url": "https://upload.wikimedia.org/wikipedia/commons/3/39/TomHanksPrincEdw031223_%2811_of_41%29_%28cropped%29.jpg",
+    "source_url": "https://commons.wikimedia.org/wiki/File:TomHanksPrincEdw031223_(11_of_41)_(cropped).jpg",
+    "author": "Raph_PH",
+    "license": "CC BY 2.0"
+  },
+  {
+    "first_name": "Taylor",
+    "last_name": "Swift",
+    "tier": "recognizable",
+    "image_url": "https://upload.wikimedia.org/wikipedia/commons/b/b3/Taylor_Swift_at_the_2024_Golden_Globes_%282%29.png",
+    "source_url": "https://commons.wikimedia.org/wiki/File:Taylor_Swift_at_the_2024_Golden_Globes_(2).png",
+    "author": "iHeartRadioCA",
+    "license": "CC BY 3.0"
+  },
+  {
+    "first_name": "Dwayne",
+    "last_name": "Johnson",
+    "tier": "recognizable",
+    "image_url": "https://upload.wikimedia.org/wikipedia/commons/7/7e/Dwayne_Johnson-1764_%284x5_cropped_with_moderate_headroom%29.jpg",
+    "source_url": "https://commons.wikimedia.org/wiki/File:Dwayne_Johnson-1764_(4x5_cropped_with_moderate_headroom).jpg",
+    "author": "Harald Krichel",
+    "license": "CC BY-SA 4.0"
+  },
+  {
+    "first_name": "Beyoncé",
+    "last_name": "",
+    "tier": "recognizable",
+    "image_url": "https://upload.wikimedia.org/wikipedia/commons/9/98/Beyonc%C3%A9_Army.mil_cropped.jpg",
+    "source_url": "https://commons.wikimedia.org/wiki/File:Beyonc%C3%A9_Army.mil_cropped.jpg",
+    "author": "Jennette F. Everett (U.S. Army); derivative by Truu",
+    "license": "Public domain"
+  },
+  {
+    "first_name": "Keanu",
+    "last_name": "Reeves",
+    "tier": "recognizable",
+    "image_url": "https://upload.wikimedia.org/wikipedia/commons/b/b4/Keanu_Reeves_at_TIFF_2025_02_%28Cropped%29.jpg",
+    "source_url": "https://commons.wikimedia.org/wiki/File:Keanu_Reeves_at_TIFF_2025_02_(Cropped).jpg",
+    "author": "Gabriel Hutchinson",
+    "license": "CC BY-SA 4.0"
+  },
+  {
+    "first_name": "Serena",
+    "last_name": "Williams",
+    "tier": "recognizable",
+    "image_url": "https://upload.wikimedia.org/wikipedia/commons/0/0d/Serena_Williams_2013.jpg",
+    "source_url": "https://commons.wikimedia.org/wiki/File:Serena_Williams_2013.jpg",
+    "author": "Doha Stadium Plus Qatar",
+    "license": "CC BY 2.0"
+  },
+  {
+    "first_name": "Leonardo",
+    "last_name": "DiCaprio",
+    "tier": "recognizable",
+    "image_url": "https://upload.wikimedia.org/wikipedia/commons/2/2d/LeoPTABFI191125-28_%28cropped%29.jpg",
+    "source_url": "https://commons.wikimedia.org/wiki/File:LeoPTABFI191125-28_(cropped).jpg",
+    "author": "Raph_PH",
+    "license": "CC BY 4.0"
+  },
+  {
+    "first_name": "Rihanna",
+    "last_name": "",
+    "tier": "recognizable",
+    "image_url": "https://upload.wikimedia.org/wikipedia/commons/c/c2/Rihanna_Fenty_2018.png",
+    "source_url": "https://commons.wikimedia.org/wiki/File:Rihanna_Fenty_2018.png",
+    "author": "SIGMA",
+    "license": "CC BY 3.0"
+  },
+  {
+    "first_name": "Morgan",
+    "last_name": "Freeman",
+    "tier": "recognizable",
+    "image_url": "https://upload.wikimedia.org/wikipedia/commons/4/42/Morgan_Freeman_at_The_Pentagon_on_2_August_2023_-_230802-D-PM193-3363_%28cropped%29.jpg",
+    "source_url": "https://commons.wikimedia.org/wiki/File:Morgan_Freeman_at_The_Pentagon_on_2_August_2023_-_230802-D-PM193-3363_(cropped).jpg",
+    "author": "U.S. Secretary of Defense",
+    "license": "Public domain"
+  },
+  {
+    "first_name": "Zendaya",
+    "last_name": "",
+    "tier": "recognizable",
+    "image_url": "https://upload.wikimedia.org/wikipedia/commons/5/5a/Zendaya-byPhilipRomano.jpg",
+    "source_url": "https://commons.wikimedia.org/wiki/File:Zendaya-byPhilipRomano.jpg",
+    "author": "PhilipRomano",
+    "license": "CC BY-SA 4.0"
+  },
+  {
+    "first_name": "Oprah",
+    "last_name": "Winfrey",
+    "tier": "recognizable",
+    "image_url": "https://upload.wikimedia.org/wikipedia/commons/e/e0/Oprah_Winfrey_2016.jpg",
+    "source_url": "https://commons.wikimedia.org/wiki/File:Oprah_Winfrey_2016.jpg",
+    "author": "US Embassy South Africa",
+    "license": "Public domain"
+  },
+  {
+    "first_name": "Cristiano",
+    "last_name": "Ronaldo",
+    "tier": "recognizable",
+    "image_url": "https://upload.wikimedia.org/wikipedia/commons/2/26/Cristiano_Ronaldo_Croatia_v_Portugal_2_July_2026-075_%28cropped%29.jpg",
+    "source_url": "https://commons.wikimedia.org/wiki/File:Cristiano_Ronaldo_Croatia_v_Portugal_2_July_2026-075_(cropped).jpg",
+    "author": "Bryan Berlin",
+    "license": "CC BY-SA 4.0"
+  },
+  {
+    "first_name": "Giancarlo",
+    "last_name": "Esposito",
+    "tier": "stretch",
+    "image_url": "https://upload.wikimedia.org/wikipedia/commons/6/60/Giancarlo_Esposito_at_Comic_Con_Oakland_2026_-_2_%28cropped%29.jpg",
+    "source_url": "https://commons.wikimedia.org/wiki/File:Giancarlo_Esposito_at_Comic_Con_Oakland_2026_-_2_(cropped).jpg",
+    "author": "Adi.darkblue",
+    "license": "CC BY-SA 4.0"
+  },
+  {
+    "first_name": "Walton",
+    "last_name": "Goggins",
+    "tier": "stretch",
+    "image_url": "https://upload.wikimedia.org/wikipedia/commons/9/9e/Walton_Goggins.jpg",
+    "source_url": "https://commons.wikimedia.org/wiki/File:Walton_Goggins.jpg",
+    "author": "Walton Goggins",
+    "license": "CC0"
+  },
+  {
+    "first_name": "Tilda",
+    "last_name": "Swinton",
+    "tier": "stretch",
+    "image_url": "https://upload.wikimedia.org/wikipedia/commons/c/cd/Tilda_Swinton_at_Cannes_Film_Festival_02_%28cropped%29.jpg",
+    "source_url": "https://commons.wikimedia.org/wiki/File:Tilda_Swinton_at_Cannes_Film_Festival_02_(cropped).jpg",
+    "author": "Danielle Varenhorst",
+    "license": "CC BY-SA 4.0"
+  },
+  {
+    "first_name": "Ken",
+    "last_name": "Watanabe",
+    "tier": "stretch",
+    "image_url": "https://upload.wikimedia.org/wikipedia/commons/8/8d/Ken_Watanabe_20220615.jpg",
+    "source_url": "https://commons.wikimedia.org/wiki/File:Ken_Watanabe_20220615.jpg",
+    "author": "Consulate-General of Japan in Los Angeles",
+    "license": "CC BY 4.0"
+  },
+  {
+    "first_name": "Greta",
+    "last_name": "Gerwig",
+    "tier": "stretch",
+    "image_url": "https://upload.wikimedia.org/wikipedia/commons/7/78/Greta_Gerwig_at_Barbie_Movie_Reception_%28headshot%29.jpg",
+    "source_url": "https://commons.wikimedia.org/wiki/File:Greta_Gerwig_at_Barbie_Movie_Reception_(headshot).jpg",
+    "author": "UKinUSA",
+    "license": "CC BY-SA 2.5"
+  },
+  {
+    "first_name": "Lewis",
+    "last_name": "Hamilton",
+    "tier": "stretch",
+    "image_url": "https://upload.wikimedia.org/wikipedia/commons/d/d3/Prime_Minister_Keir_Starmer_meets_Sir_Lewis_Hamilton_%2854566928382%29_%28cropped%29.jpg",
+    "source_url": "https://commons.wikimedia.org/wiki/File:Prime_Minister_Keir_Starmer_meets_Sir_Lewis_Hamilton_(54566928382)_(cropped).jpg",
+    "author": "Number 10",
+    "license": "OGL 3"
+  },
+  {
+    "first_name": "Rosalía",
+    "last_name": "",
+    "tier": "stretch",
+    "image_url": "https://upload.wikimedia.org/wikipedia/commons/0/03/Rosal%C3%ADa_entrevista_2025_01.png",
+    "source_url": "https://commons.wikimedia.org/wiki/File:Rosal%C3%ADa_entrevista_2025_01.png",
+    "author": "Tele Urban",
+    "license": "CC BY 3.0"
+  },
+  {
+    "first_name": "Tems",
+    "last_name": "",
+    "tier": "stretch",
+    "image_url": "https://upload.wikimedia.org/wikipedia/commons/e/ec/Tems_on_NdaniTV_Sessions_-cropped.png",
+    "source_url": "https://commons.wikimedia.org/wiki/File:Tems_on_NdaniTV_Sessions_-cropped.png",
+    "author": "NdaniTV",
+    "license": "CC BY 3.0",
+    "substitutionFor": "Burna Boy",
+    "substitutionReason": "No usable image found: every Wikimedia Commons photo of Burna Boy available at research time either hid his eyes behind sunglasses or had the microphone obscuring his mouth, failing the recognizable-front-facing-headshot bar. Substituted with fellow Nigerian Afrobeats stretch-tier artist Tems, who has a clear, unobstructed, front-facing Commons photo."
+  }
+]

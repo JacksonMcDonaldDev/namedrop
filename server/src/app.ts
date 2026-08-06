@@ -13,6 +13,7 @@ app.use(express.json());
 
 // Static file serving for photos
 app.use('/uploads/photos', express.static(path.join(__dirname, '..', 'uploads', 'photos')));
+app.use('/uploads/celebrity-photos', express.static(path.join(__dirname, '..', 'uploads', 'celebrity-photos')));
 
 // API routes
 app.use('/api', router);

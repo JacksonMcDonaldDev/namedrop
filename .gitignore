@@ -4,3 +4,5 @@ dist/
 .DS_Store
 server/uploads/photos/*
 !server/uploads/photos/.gitkeep
+server/uploads/celebrity-photos/*
+!server/uploads/celebrity-photos/.gitkeep
