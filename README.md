@@ -42,6 +42,16 @@ npm run dev
 
 The client dev server proxies `/api` and `/uploads` requests to the server at `localhost:3001`.
 
+## Testing
+
+```bash
+cd server
+npm test
+```
+
+Server tests use supertest against a dedicated `_test` database, migrated and cleaned automatically.
+See `server/tests/README.md` for the pattern and test DB lifecycle.
+
 ## Usage
 
 1. **Add contacts** — Go to Contacts, click "Add Contact", fill in name + photo. Optionally paste a LinkedIn profile URL to import the name and photo, or drag an image (including from another browser window) onto the photo area.
